@@ -9,6 +9,7 @@
 import UIKit
 import SwiftUI
 import LBTATools
+import Firebase
 
 class ViewController: UIViewController {
     
@@ -24,14 +25,31 @@ class ViewController: UIViewController {
         tf.backgroundColor = UIColor.init(white: 0, alpha: 0.03)
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
+        
+        tf.addTarget(self, action: #selector(handleTextInput), for: .editingChanged)
         return tf
     }()
+    
+    @objc func handleTextInput() {
+        let isFormValid = emailTextField.text?.count ?? 0 > 0 &&
+            usernameTextField.text?.count ?? 0 > 0 &&
+            passwordTextField.text?.count ?? 0 > 0
+        
+        if isFormValid {
+            signupButton.isEnabled = true
+            signupButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+        } else {
+            signupButton.isEnabled = false
+            signupButton.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
+        }
+    }
     
     let usernameTextField: UITextField = {
         let tf = UITextField(placeholder: "Username")
         tf.backgroundColor = UIColor.init(white: 0, alpha: 0.03)
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
+        tf.addTarget(self, action: #selector(handleTextInput), for: .editingChanged)
         return tf
     }()
     
@@ -41,25 +59,47 @@ class ViewController: UIViewController {
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
         tf.isSecureTextEntry = true
+        tf.addTarget(self, action: #selector(handleTextInput), for: .editingChanged)
         return tf
     }()
     
     let signupButton: UIButton = {
-        let button = UIButton(title: "Sign Up", titleColor: .white, font: .boldSystemFont(ofSize: 14), backgroundColor: UIColor(red: 149/255, green: 204/255, blue: 244/255, alpha: 1))
-        
+        let button = UIButton(title: "Sign Up", titleColor: .white, font: .boldSystemFont(ofSize: 14), backgroundColor: UIColor.rgb(red: 149, green: 204, blue: 244))
+        button.addTarget(self, action: #selector(handleSignUp), for: .touchUpInside)
         button.layer.cornerRadius = 5
+        
+        button.isEnabled = false
         
         return button
     }()
     
+    
+    @objc func handleSignUp() {
+        guard let email = emailTextField.text, email.count > 0 else { return }
+        guard let username = usernameTextField.text, username.count > 0 else { return }
+        guard let password = passwordTextField.text, password.count > 0 else { return }
+        
+        Auth.auth().createUser(withEmail: email, password: password) { (result: AuthDataResult?, error: Error?) in
+            if let err = error {
+                print("Failed to create user", err)
+                return
+            }
+            
+            print("Successfully created user: ", result?.user.uid ?? "")
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        view.backgroundColor = .white
+        
         view.addSubview(plusPhotoButton)
         
-        plusPhotoButton.withSize(.init(width: 140, height: 140))
+        plusPhotoButton.anchor(top: view.safeAreaLayoutGuide.topAnchor, leading: nil, bottom: nil, trailing: nil, padding: .init(top: 40, left: 0, bottom: 0, right: 0), size: .init(width: 140, height: 140))
+        
         plusPhotoButton.centerXToSuperview()
-        plusPhotoButton.anchor(.top(view.safeAreaLayoutGuide.topAnchor, constant: 40))
+        
         
         setUpInputFields()
     }
@@ -73,7 +113,7 @@ class ViewController: UIViewController {
         
         view.addSubview(stackViews)
         
-        stackViews.anchor(top: plusPhotoButton.bottomAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 20, left: 40, bottom: 0, right: 40), size: .init(width: 0, height: 50 * 4 + 10 * 3))
+        stackViews.anchor(top: plusPhotoButton.bottomAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 20, left: 40, bottom: 0, right: 40), size: .init(width: 0, height: 200))
     }
     
     
