@@ -11,14 +11,37 @@ import SwiftUI
 import LBTATools
 import Firebase
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     
     let plusPhotoButton: UIButton = {
         let button = UIButton(type: .system)
         button.setBackgroundImage(#imageLiteral(resourceName: "plus_photo").withRenderingMode(.alwaysOriginal), for: .normal)
-        
+        button.addTarget(self, action: #selector(handlePlusPhoto), for: .touchUpInside)
         return button
     }()
+    
+    @objc func handlePlusPhoto() {
+        let picker = UIImagePickerController()
+        picker.delegate = self
+        picker.allowsEditing = true
+        present(picker, animated: true)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        
+        if let originalImage = info[.originalImage] as? UIImage {
+            plusPhotoButton.setImage(originalImage.withRenderingMode(.alwaysOriginal), for: .normal)
+        } else if let edittedImage = info[.editedImage] as? UIImage {
+            plusPhotoButton.setImage(edittedImage.withRenderingMode(.alwaysOriginal), for: .normal)
+        }
+        
+        plusPhotoButton.layer.cornerRadius = plusPhotoButton.frame.size.width / 2
+        plusPhotoButton.layer.masksToBounds = true
+        plusPhotoButton.layer.borderColor = UIColor.black.cgColor
+        plusPhotoButton.layer.borderWidth = 3
+        
+        dismiss(animated: true)
+    }
     
     let emailTextField: UITextField = {
         let tf = UITextField(placeholder: "Email")
@@ -86,6 +109,54 @@ class ViewController: UIViewController {
             }
             
             print("Successfully created user: ", result?.user.uid ?? "")
+            
+            
+            // Upload user profile image
+            guard let image = self.plusPhotoButton.imageView?.image else { return }
+            
+            guard let imageData = image.jpegData(compressionQuality: 0.3) else { return }
+            
+            let fileName = UUID().uuidString
+            
+            let metaData = StorageMetadata()
+            metaData.contentType = "image/jpeg"
+            
+            Storage.storage().reference().child("profile_images").child(fileName).putData(imageData, metadata: metaData) { (metaData, error) in
+                if let err = error {
+                    print("Failed to upload profile image: ", err)
+                    return
+                }
+                
+                guard let path = metaData?.path else { return }
+                
+                Storage.storage().reference(withPath: path).downloadURL(completion: { (url, error) in
+                    if let err = error {
+                        print("Some error: ", err)
+                        return
+                    }
+                    
+                    guard let profileImageUrl = url else { return }
+                    
+                    print("Successfully uploaded profile image", profileImageUrl.absoluteString)
+                    
+                    // User database
+                    guard let uid = result?.user.uid else { return }
+                    guard let username = self.usernameTextField.text else { return }
+                    
+                    Firestore.firestore().collection("users").document(uid).setData(
+                        ["username": username,
+                         "profileImageUrl": profileImageUrl.absoluteString],
+                        completion: { (err) in
+                        if let err = err {
+                            print("Failed to save user info into db: ", err)
+                            return
+                        }
+                        
+                        print("Successfully saved user info into db")
+                    })
+                })
+            }
+            
         }
     }
     
