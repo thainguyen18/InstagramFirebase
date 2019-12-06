@@ -11,7 +11,7 @@ import SwiftUI
 import LBTATools
 import Firebase
 
-class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
+class SignUpController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     
     let plusPhotoButton: UIButton = {
         let button = UIButton(type: .system)
@@ -188,19 +188,19 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
 }
 
-
-struct ViewControllerPreview: PreviewProvider {
+struct SignUpPreview: PreviewProvider {
     static var previews: some View {
-        ViewControllerContainerView()
+        SignUpView()
     }
     
-    struct ViewControllerContainerView: UIViewControllerRepresentable {
-        func updateUIViewController(_ uiViewController: ViewControllerPreview.ViewControllerContainerView.UIViewControllerType, context: UIViewControllerRepresentableContext<ViewControllerPreview.ViewControllerContainerView>) {
+    
+    struct SignUpView: UIViewControllerRepresentable {
+        func updateUIViewController(_ uiViewController: SignUpPreview.SignUpView.UIViewControllerType, context: UIViewControllerRepresentableContext<SignUpPreview.SignUpView>) {
             
         }
         
-        func makeUIViewController(context: UIViewControllerRepresentableContext<ViewControllerPreview.ViewControllerContainerView>) -> ViewController {
-            return ViewController()
+        func makeUIViewController(context: UIViewControllerRepresentableContext<SignUpPreview.SignUpView>) -> SignUpController {
+            return SignUpController()
         }
     }
 }

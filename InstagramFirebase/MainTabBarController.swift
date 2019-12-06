@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftUI
+import Firebase
 
 class MainTabBarController: UITabBarController {
     override func viewDidLoad() {
@@ -21,8 +22,25 @@ class MainTabBarController: UITabBarController {
         nav.tabBarItem.selectedImage = #imageLiteral(resourceName: "profile_selected")
         
         tabBar.tintColor = .black
-        
         viewControllers = [nav, UIViewController()]
+    }
+    
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        showLogIn()
+    }
+    
+    fileprivate func showLogIn() {
+        if Auth.auth().currentUser == nil {
+            DispatchQueue.main.async {
+                let loginController = LoginController()
+                let nav = UINavigationController(rootViewController: loginController)
+                nav.modalPresentationStyle = .fullScreen
+                self.present(nav, animated: true)
+            }
+        }
     }
 }
 
