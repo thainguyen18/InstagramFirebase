@@ -14,6 +14,10 @@ class MainTabBarController: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupViewControllers()
+    }
+    
+    func setupViewControllers() {
         let userProfileController = UserProfileController()
         
         let nav = UINavigationController(rootViewController: userProfileController)

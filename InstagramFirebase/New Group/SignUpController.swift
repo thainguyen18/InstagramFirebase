@@ -15,7 +15,7 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
     
     let plusPhotoButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setBackgroundImage(#imageLiteral(resourceName: "plus_photo").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "plus_photo").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handlePlusPhoto), for: .touchUpInside)
         return button
     }()
@@ -96,6 +96,22 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         return button
     }()
     
+    let alreadyHaveAnAccountButton: UIButton = {
+        let button = UIButton(type: .system)
+        
+        let attributedTitle = NSMutableAttributedString(string: "Already have an account?  ", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.lightGray])
+        
+        attributedTitle.append(NSAttributedString(string: "Sign In", attributes: [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.rgb(red: 17, green: 154, blue: 237)]))
+        
+        button.setAttributedTitle(attributedTitle, for: .normal)
+        button.addTarget(self, action: #selector(handleAlreadyHaveAnAccount), for: .touchUpInside)
+        return button
+    }()
+    
+    @objc func handleAlreadyHaveAnAccount() {
+        _ = navigationController?.popViewController(animated: true)
+    }
+    
     
     @objc func handleSignUp() {
         guard let email = emailTextField.text, email.count > 0 else { return }
@@ -153,6 +169,13 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
                         }
                         
                         print("Successfully saved user info into db")
+                            let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
+                            
+                            guard let mainTabBarController = window?.rootViewController as? MainTabBarController else { return }
+                            
+                        mainTabBarController.setupViewControllers()
+                            
+                        self.dismiss(animated: true)
                     })
                 })
             }
@@ -167,12 +190,15 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         
         view.addSubview(plusPhotoButton)
         
-        plusPhotoButton.anchor(top: view.safeAreaLayoutGuide.topAnchor, leading: nil, bottom: nil, trailing: nil, padding: .init(top: 40, left: 0, bottom: 0, right: 0), size: .init(width: 140, height: 140))
+        plusPhotoButton.anchor(top: view.safeAreaLayoutGuide.topAnchor, leading: nil, bottom: nil, trailing: nil, padding: .init(top: 40, left: 0, bottom: 0, right: 0), size: .init(width: 150, height: 150))
         
         plusPhotoButton.centerXToSuperview()
         
-        
         setUpInputFields()
+        
+        view.addSubview(alreadyHaveAnAccountButton)
+        
+        alreadyHaveAnAccountButton.anchor(top: nil, leading: view.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 0), size: .init(width: 0, height: 40))
     }
     
     fileprivate func setUpInputFields() {

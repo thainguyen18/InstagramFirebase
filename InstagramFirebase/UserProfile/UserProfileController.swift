@@ -47,6 +47,13 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, String, UserPro
         alertController.addAction(UIAlertAction(title: "Log Out", style: .destructive, handler: { (_) in
             do {
                 try Auth.auth().signOut()
+                
+                // Present log in UI after signing out
+                let loginController = LoginController()
+                let nav = UINavigationController(rootViewController: loginController)
+                nav.modalPresentationStyle = .fullScreen
+                self.present(nav, animated: true)
+                
             } catch let signOutError {
                 print("Failed to sign out: ", signOutError)
             }
