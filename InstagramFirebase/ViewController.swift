@@ -186,11 +186,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         
         stackViews.anchor(top: plusPhotoButton.bottomAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 20, left: 40, bottom: 0, right: 40), size: .init(width: 0, height: 200))
     }
-    
-    
-    
-    
 }
+
 
 struct ViewControllerPreview: PreviewProvider {
     static var previews: some View {
