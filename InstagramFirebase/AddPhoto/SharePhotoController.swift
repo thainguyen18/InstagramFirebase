@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import Firebase
 
 class SharePhotoController: UIViewController {
     override func viewDidLoad() {
@@ -36,7 +37,7 @@ class SharePhotoController: UIViewController {
     
     let textView: UITextView = {
        let tv = UITextView()
-        tv.backgroundColor = .green
+        tv.backgroundColor = .white
         tv.text = "Some caption text for our photo..."
         tv.font = .systemFont(ofSize: 14)
         tv.textColor = .black
@@ -61,7 +62,67 @@ class SharePhotoController: UIViewController {
     }
     
     @objc func handleShare() {
+        guard let caption = textView.text, caption.count > 0 else {
+            print("Please add caption!")
+            return
+        }
         
+        let filename = UUID().uuidString
+        
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
+        
+        guard let selectedImage = self.selectedImage, let imageData = selectedImage.jpegData(compressionQuality: 0.5) else { return }
+        
+        navigationItem.rightBarButtonItem?.isEnabled = false
+        
+        Storage.storage().reference().child("posts").child(filename).putData(imageData, metadata: metadata) { (metaData, error) in
+            if let err = error {
+                print("Failed to upload image: ", err)
+                self.navigationItem.rightBarButtonItem?.isEnabled = true
+                return
+            }
+            
+            guard let path = metaData?.path else { return }
+            
+            Storage.storage().reference(withPath: path).downloadURL { (url, error) in
+                if let err = error {
+                    print("Some error: ", err)
+                    self.navigationItem.rightBarButtonItem?.isEnabled = true
+                    return
+                }
+                
+                guard let imageUrl = url else { return }
+                
+                print("Successfully uploaded image: ", imageUrl.absoluteString)
+                
+                self.saveToDatabaseWithImageUrl(imageUrl: imageUrl.absoluteString)
+            }
+        }
+    }
+    
+    fileprivate func saveToDatabaseWithImageUrl(imageUrl: String) {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        guard let postImage = selectedImage else { return }
+        
+        guard let caption = textView.text else { return }
+        
+        let userPostRef = Firestore.firestore().collection("posts").document(uid).collection("userposts").document()
+        
+        let values: [String : Any] = ["imageUrl" : imageUrl, "caption" : caption, "imageWidth" : postImage.size.width, "imageHeight" : postImage.size.height, "creationDate" : Date().timeIntervalSince1970]
+        
+        userPostRef.setData(values) { (error) in
+            if let err = error {
+                print("Failed to save post to db: ", err)
+                self.navigationItem.rightBarButtonItem?.isEnabled = true
+                return
+            }
+            
+            print("Successfully save post to db")
+            
+            self.dismiss(animated: true)
+        }
     }
     
     override var prefersStatusBarHidden: Bool {

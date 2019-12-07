@@ -99,7 +99,7 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, String, UserPro
             
             if let userData = snapShot, userData.exists, let dictionary = userData.data() {
                 
-                print(dictionary)
+                //print(dictionary)
                 
                 self.user = User(dictionary: dictionary)
                     
