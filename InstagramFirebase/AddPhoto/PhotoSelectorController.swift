@@ -76,6 +76,9 @@ class PhotoSelectorController: LBTAListHeaderController<ImageCell, UIImage, Phot
         
     }
     
+    // Keep a ref to the header to access selected high res Image
+    var photoSelectorHeader: PhotoSelectorHeader?
+    
     override func setupHeader(_ header: PhotoSelectorHeader) {
         
         // Extract the asset of selected image to retrieve a higher res version
@@ -91,17 +94,21 @@ class PhotoSelectorController: LBTAListHeaderController<ImageCell, UIImage, Phot
                 imageManager.requestImage(for: selectedAsset, targetSize: targetSize, contentMode: .aspectFit, options: options) { (image, info) in
                     
                     header.selectedImageView.image = image
+                    
                 }
             }
         }
         
-        
+        photoSelectorHeader = header
     }
     
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         selectedImage = items[indexPath.item]
         
         collectionView.reloadData()
+        
+        let indexPath = IndexPath(item: 0, section: 0)
+        collectionView.scrollToItem(at: indexPath, at: .bottom, animated: true)
     }
     
     private var selectedImage: UIImage?
@@ -194,6 +201,8 @@ class PhotoSelectorController: LBTAListHeaderController<ImageCell, UIImage, Phot
     }
     
     @objc func handleNext() {
-        
+        let sharePhotoController = SharePhotoController()
+        sharePhotoController.selectedImage = self.photoSelectorHeader?.selectedImageView.image
+        navigationController?.pushViewController(sharePhotoController, animated: true)
     }
 }
