@@ -10,23 +10,66 @@ import UIKit
 import SwiftUI
 import Firebase
 
-class MainTabBarController: UITabBarController {
+class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.delegate = self
         
         setupViewControllers()
     }
     
+    func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
+        
+        let index = viewControllers?.firstIndex(of: viewController)
+        
+        if index == 2 {
+            
+            let photoSelectorController = PhotoSelectorController()
+            let nav = UINavigationController(rootViewController: photoSelectorController)
+            nav.modalPresentationStyle = .fullScreen
+            present(nav, animated: true)
+            
+            return false
+        }
+        
+        return true
+    }
+    
     func setupViewControllers() {
-        let userProfileController = UserProfileController()
+        // Home
+        let homeNav = templateNav(selectedImage: #imageLiteral(resourceName: "home_selected"), unselectedImage: #imageLiteral(resourceName: "home_unselected"), rootViewController: UserProfileController())
         
-        let nav = UINavigationController(rootViewController: userProfileController)
+        // Search
+        let searchNav = templateNav(selectedImage: #imageLiteral(resourceName: "search_selected"), unselectedImage: #imageLiteral(resourceName: "search_unselected"))
         
-        nav.tabBarItem.image = #imageLiteral(resourceName: "profile_unselected")
-        nav.tabBarItem.selectedImage = #imageLiteral(resourceName: "profile_selected")
+        // Plus
+        let plusNav = templateNav(selectedImage: #imageLiteral(resourceName: "plus_unselected") , unselectedImage: #imageLiteral(resourceName: "plus_unselected"))
         
+        // Like
+        let likeNav = templateNav(selectedImage: #imageLiteral(resourceName: "like_selected"), unselectedImage: #imageLiteral(resourceName: "like_unselected"))
+        
+        // user profile
+        let profileNav = templateNav(selectedImage: #imageLiteral(resourceName: "profile_selected"), unselectedImage: #imageLiteral(resourceName: "profile_unselected"))
+        
+        // add view controllers to tab bar
         tabBar.tintColor = .black
-        viewControllers = [nav, UIViewController()]
+        viewControllers = [homeNav, searchNav, plusNav, likeNav, profileNav]
+        
+        // Modify tab bar items insets
+        tabBar.items?.forEach {
+            $0.imageInsets = .init(top: 4, left: 0, bottom: -4, right: 0)
+        }
+    }
+    
+    fileprivate func templateNav(selectedImage: UIImage, unselectedImage: UIImage, rootViewController: UIViewController = UIViewController()) -> UINavigationController {
+        let viewController = rootViewController
+        let nav = UINavigationController(rootViewController: viewController)
+        
+        nav.tabBarItem.image = unselectedImage
+        nav.tabBarItem.selectedImage = selectedImage
+        
+        return nav
     }
     
     
