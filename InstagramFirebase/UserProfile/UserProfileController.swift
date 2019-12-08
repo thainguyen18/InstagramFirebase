@@ -14,26 +14,14 @@ import LBTATools
 
 class PhotoCell: LBTAListCell<Post> {
     override var item: Post! {
+        
         didSet {
-            guard let url = URL(string: item.imageUrl) else { return }
-            
-            URLSession.shared.dataTask(with: url) { (data, response, error) in
-                if let err = error {
-                    print("Failed to fetch post image: ", err)
-                    return
-                }
-                
-                guard let data = data else { return }
-                
-                DispatchQueue.main.async {
-                    self.imageView.image = UIImage(data: data)
-                }
-            }.resume()
+            self.imageView.loadImage(urlString: item.imageUrl)
         }
     }
     
-    let imageView: UIImageView = {
-       let iv = UIImageView()
+    let imageView: CustomImageView = {
+       let iv = CustomImageView()
         iv.backgroundColor = .blue
         iv.contentMode = .scaleToFill
         iv.clipsToBounds = true
@@ -58,7 +46,7 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
         
         fetchUser()
         
-        fetchPosts()
+        //fetchPosts()
         
         setupLogOutButton()
     }
@@ -68,25 +56,29 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
     fileprivate func fetchPosts() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
-        self.listener = Firestore.firestore().collection("posts").document(uid).collection("userposts").addSnapshotListener { (querySnapshot, error) in
+        let ref = Firestore.firestore().collection("posts").document(uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 10)
+        
+        self.listener = ref.addSnapshotListener { (querySnapshot, error) in
             if let err = error {
                 print("Failed to fetch user posts: ", err)
                 return
             }
             
-            guard let documents = querySnapshot?.documents else { return }
+            guard let snapshot = querySnapshot else { return }
             
-            documents.forEach { document in
-                let post = Post(dictionary: document.data())
+            snapshot.documentChanges.forEach { diff in
+                let post = Post(dictionary: diff.document.data())
                 
-                self.items.append(post)
+                self.items.insert(post, at: 0)
             }
             
-           
-            self.collectionView.reloadData()
+            DispatchQueue.main.async {
+                self.items.sort { $0.creationDate > $1.creationDate }
+                
+                self.collectionView.reloadData()
+            }
+            
         }
-        
-        
     }
     
     // Stop listening to database changes
@@ -160,9 +152,10 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
                 self.navigationItem.title = self.user?.username
                 
                 // Pass data after fetching and reload
-                DispatchQueue.main.async {
-                    self.collectionView.reloadData()
-                }
+                self.fetchPosts()
+//                DispatchQueue.main.async {
+//                    self.collectionView.reloadData()
+//                }
                
             } else {
                 print("Document does not exist")

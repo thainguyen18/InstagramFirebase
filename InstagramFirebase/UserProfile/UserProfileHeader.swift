@@ -13,14 +13,17 @@ class UserProfileHeader: UICollectionReusableView {
     
     var user: User? {
         didSet {
-            setupProfileImage()
+            
+            guard let imageUrl = user?.profileImageUrl else { return }
+            
+            imageView.loadImage(urlString: imageUrl)
             
             nameLabel.text = user?.username
         }
     }
     
-    let imageView: UIImageView = {
-        let iv = UIImageView()
+    let imageView: CustomImageView = {
+        let iv = CustomImageView()
         iv.backgroundColor = .green
         
         return iv
@@ -101,25 +104,6 @@ class UserProfileHeader: UICollectionReusableView {
         )
     }
     
-    
-    fileprivate func setupProfileImage() {
-        guard let downloadUrl = self.user?.profileImageUrl, let url = URL(string: downloadUrl) else { return }
-        
-        URLSession.shared.dataTask(with: url) { (data, response, error) in
-            // Download Image profile
-            if let err = error {
-                print("Failed to fetch profile image: ", err)
-                return
-            }
-            
-            guard let data = data else { return }
-            let image = UIImage(data: data)
-            
-            DispatchQueue.main.async {
-                self.imageView.image = image
-            }
-        }.resume()
-    }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
