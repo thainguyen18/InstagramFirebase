@@ -126,6 +126,14 @@
 			path = Home;
 			sourceTree = "<group>";
 		};
+		4B4FF1D1239EA366008B123B /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				4B33B6A8239B0790009CB15B /* SearchController.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
 		4BFF21BD23983C7800FAE15A = {
 			isa = PBXGroup;
 			children = (
@@ -153,7 +161,7 @@
 				4BFF21CD23983C7800FAE15A /* ContentView.swift */,
 				4B091D082398D76800C8EF15 /* MainTabBarController.swift */,
 				4B33B6B4239CACFE009CB15B /* Home */,
-				4B33B6A8239B0790009CB15B /* SearchController.swift */,
+				4B4FF1D1239EA366008B123B /* Search */,
 				4B33B6AF239C4246009CB15B /* Model */,
 				4B33B6AA239B10A7009CB15B /* AddPhoto */,
 				4B091D0F239A257D00C8EF15 /* Login */,
