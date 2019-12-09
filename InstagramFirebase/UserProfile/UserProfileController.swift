@@ -66,8 +66,10 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
             
             guard let snapshot = querySnapshot else { return }
             
+            guard let user = self.user else { return }
+            
             snapshot.documentChanges.forEach { diff in
-                let post = Post(dictionary: diff.document.data())
+                let post = Post(user: user, dictionary: diff.document.data())
                 
                 self.items.insert(post, at: 0)
             }
@@ -137,43 +139,19 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
     fileprivate func fetchUser() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
-        let docRef = Firestore.firestore().collection("users").document(uid)
-        
-        docRef.getDocument { (snapShot, error) in
-            if let err = error {
-                print("Failed to fetch user info: ", err)
-                return
-            }
+        Firestore.fetchUserWithUID(uid: uid) { (user) in
+            self.user = user
+                
+            self.navigationItem.title = self.user?.username
             
-            if let userData = snapShot, userData.exists, let dictionary = userData.data() {
-                
-                self.user = User(dictionary: dictionary)
-                    
-                self.navigationItem.title = self.user?.username
-                
-                // Pass data after fetching and reload
-                self.fetchPosts()
-//                DispatchQueue.main.async {
-//                    self.collectionView.reloadData()
-//                }
-               
-            } else {
-                print("Document does not exist")
-            }
+            // Pass data after fetching and reload
+            self.fetchPosts()
         }
     }
 }
 
 
-class User {
-    var username: String
-    var profileImageUrl: String
-    
-    init(dictionary: [String:Any]) {
-        self.username = dictionary["username"] as? String ?? ""
-        self.profileImageUrl = dictionary["profileImageUrl"] as? String ?? ""
-    }
-}
+
 
 
 struct UserProfilePreview: PreviewProvider {

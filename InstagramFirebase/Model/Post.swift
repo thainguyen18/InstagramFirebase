@@ -14,12 +14,14 @@ struct Post {
     let creationDate: Double
     let imageWidth: Double
     let imageHeight: Double
+    let user: User
     
-    init(dictionary: [String: Any]) {
+    init(user: User, dictionary: [String: Any]) {
         self.imageUrl = dictionary["imageUrl"] as? String ?? ""
         self.caption = dictionary["caption"] as? String ?? ""
         self.creationDate = dictionary["creationDate"] as? Double ?? 0
         self.imageWidth = dictionary["imageWidth"] as? Double ?? 0
         self.imageHeight = dictionary["imageHeight"] as? Double ?? 0
+        self.user = user
     }
 }

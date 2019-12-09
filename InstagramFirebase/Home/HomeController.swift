@@ -16,12 +16,31 @@ class HomePostCell: LBTAListCell<Post> {
     override var item: Post! {
         didSet {
             photoImageView.loadImage(urlString: item.imageUrl)
+            
+            usernameLabel.text = item.user.username
+            
+            userProfileImageView.loadImage(urlString: item.user.profileImageUrl)
+            
+            captionLabel.text = item.caption
+            
+            setupAttributedCaption()
         }
+    }
+    
+    fileprivate func setupAttributedCaption() {
+        let attributedText = NSMutableAttributedString(string: item.user.username, attributes: [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 14)])
+        
+        attributedText.append(NSAttributedString(string: " \(item.caption)", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.black]))
+        
+        attributedText.append(NSAttributedString(string: "\n\n", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 4), NSAttributedString.Key.foregroundColor : UIColor.black]))
+        
+        attributedText.append(NSAttributedString(string: "1 week ago", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.lightGray]))
+        
+        captionLabel.attributedText = attributedText
     }
     
     let photoImageView: CustomImageView = {
        let iv = CustomImageView()
-        iv.backgroundColor = .blue
         iv.contentMode = .scaleToFill
         iv.clipsToBounds = true
         
@@ -30,7 +49,6 @@ class HomePostCell: LBTAListCell<Post> {
     
     let userProfileImageView: CustomImageView = {
        let iv = CustomImageView()
-        iv.backgroundColor = .green
         iv.contentMode = .scaleToFill
         iv.clipsToBounds = true
         
@@ -42,7 +60,7 @@ class HomePostCell: LBTAListCell<Post> {
         label.text = "username"
         label.font = .boldSystemFont(ofSize: 14)
         label.textColor = .black
-        label.backgroundColor = .yellow
+        //label.backgroundColor = .white
         label.numberOfLines = 0
         
         return label
@@ -59,7 +77,7 @@ class HomePostCell: LBTAListCell<Post> {
     
     let likeButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "like_unselected"), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
         
         return button
     }()
@@ -88,20 +106,9 @@ class HomePostCell: LBTAListCell<Post> {
     let captionLabel: UILabel = {
         let label = UILabel()
         
-        let attributedText = NSMutableAttributedString(string: "Username", attributes: [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 14)])
         
-        attributedText.append(NSAttributedString(string: " is doing some great work that might even wrap onto the next line, see if that happens...", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 14)]))
         
-        attributedText.append(NSAttributedString(string: "\n\n", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 4)]))
-        
-        attributedText.append(NSAttributedString(string: "1 week ago", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.lightGray]))
-        
-        label.attributedText = attributedText
-        //label.text = "caption..."
-        label.font = .systemFont(ofSize: 14)
-        label.textColor = .black
         label.numberOfLines = 0
-        label.backgroundColor = .green
         
         return label
     }()
@@ -109,7 +116,7 @@ class HomePostCell: LBTAListCell<Post> {
     override func setupViews() {
         super.setupViews()
         
-        backgroundColor = .red
+        backgroundColor = .white
         
         userProfileImageView.layer.cornerRadius = 40 / 2
         
@@ -151,15 +158,11 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        collectionView.backgroundColor = .white
-        
-        let post = Post(dictionary: [:])
-        
-        items = Array(repeating: post, count: 5)
+        collectionView.backgroundColor = UIColor(white: 0.9, alpha: 1)
         
         setupNavigationItems()
         
-        //fetchPosts()
+        fetchPosts()
     }
     
     fileprivate func setupNavigationItems() {
@@ -169,7 +172,13 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     fileprivate func fetchPosts() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
-        let ref = Firestore.firestore().collection("posts").document(uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 10)
+        Firestore.fetchUserWithUID(uid: uid) { user in
+            self.fetchPostsWithUser(user: user)
+        }
+    }
+    
+    fileprivate func fetchPostsWithUser(user: User) {
+        let ref = Firestore.firestore().collection("posts").document(user.uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 10)
         
         ref.getDocuments { (querySnapshot, error) in
             if let err = error {
@@ -180,7 +189,8 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
             guard let snapshot = querySnapshot else { return }
             
             snapshot.documents.forEach { document in
-                let post = Post(dictionary: document.data())
+                
+                let post = Post(user: user, dictionary: document.data())
                 
                 self.items.insert(post, at: 0)
             }
@@ -190,7 +200,6 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                 
                 self.collectionView.reloadData()
             }
-            
         }
     }
     
@@ -204,6 +213,7 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         return .init(width: view.frame.width, height: height)
     }
 }
+
 
 struct HomePreview: PreviewProvider {
     static var previews: some View {
