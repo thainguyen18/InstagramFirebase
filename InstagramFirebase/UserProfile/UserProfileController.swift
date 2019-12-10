@@ -70,8 +70,9 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
                 self.items.insert(post, at: 0)
             }
             
+            self.items.sort { $0.creationDate > $1.creationDate }
+            
             DispatchQueue.main.async {
-                self.items.sort { $0.creationDate > $1.creationDate }
                 
                 self.collectionView.reloadData()
             }

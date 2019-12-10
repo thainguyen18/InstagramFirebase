@@ -25,6 +25,9 @@ class CustomImageView: UIImageView {
         
         lastUsedUrl = urlString
         
+        // set its image to nil to avoid flickering
+        self.image = nil
+        
         guard let url = URL(string: urlString) else { return }
         
         URLSession.shared.dataTask(with: url) { (data, response, error) in

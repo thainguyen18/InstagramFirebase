@@ -34,7 +34,9 @@ class HomePostCell: LBTAListCell<Post> {
         
         attributedText.append(NSAttributedString(string: "\n\n", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 4), NSAttributedString.Key.foregroundColor : UIColor.black]))
         
-        attributedText.append(NSAttributedString(string: "1 week ago", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.lightGray]))
+        let creationDate = Date(timeIntervalSince1970: item.creationDate)
+        
+        attributedText.append(NSAttributedString(string: creationDate.timeAgoDisplay(), attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.lightGray]))
         
         captionLabel.attributedText = attributedText
     }
@@ -158,17 +160,62 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoController.updateFeedNotificationName, object: nil)
+        
         collectionView.backgroundColor = UIColor(white: 0.9, alpha: 1)
         
         setupNavigationItems()
         
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        
+        collectionView.refreshControl = refreshControl
+        
+        fetchAllPosts()
+    }
+    
+    @objc func handleUpdateFeed() {
+        handleRefresh()
+    }
+    
+    @objc func handleRefresh() {
+        
+        // Remove old data
+        self.items.removeAll()
+        
+        fetchAllPosts()
+    }
+    
+    fileprivate func fetchAllPosts() {
         fetchPosts()
+        
+        fetchFollowingUserIds()
+    }
+    
+    fileprivate func fetchFollowingUserIds() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        Firestore.firestore().collection("following").document(uid).getDocument { (snapshot, error) in
+            if let err = error {
+                print("Failed to fetch following users ", err)
+                return
+            }
+            
+            guard let followingUsersDict = snapshot?.data() else { return }
+            
+            followingUsersDict.forEach { (userId, _) in
+                Firestore.fetchUserWithUID(uid: userId) { (user) in
+                    self.fetchPostsWithUser(user: user)
+                }
+            }
+        }
     }
     
     fileprivate func setupNavigationItems() {
         navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "logo2"))
     }
     
+    // Fetch posts from current logged in user
     fileprivate func fetchPosts() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
@@ -178,11 +225,16 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     }
     
     fileprivate func fetchPostsWithUser(user: User) {
-        let ref = Firestore.firestore().collection("posts").document(user.uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 10)
+        
+        let ref = Firestore.firestore().collection("posts").document(user.uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 20)
         
         ref.getDocuments { (querySnapshot, error) in
+            
+            self.collectionView.refreshControl?.endRefreshing()
+            
             if let err = error {
                 print("Failed to fetch user posts: ", err)
+                
                 return
             }
             
@@ -192,11 +244,14 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                 
                 let post = Post(user: user, dictionary: document.data())
                 
-                self.items.insert(post, at: 0)
+                self.items.append(post)
             }
             
+            print(self.items.count)
+            
+            self.items.sort { $0.creationDate > $1.creationDate }
+            
             DispatchQueue.main.async {
-                self.items.sort { $0.creationDate > $1.creationDate }
                 
                 self.collectionView.reloadData()
             }

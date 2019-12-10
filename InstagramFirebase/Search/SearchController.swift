@@ -137,9 +137,10 @@ class SearchController: LBTAListController<UserSearchCell, User>, UICollectionVi
                 self.items.append(user)
             }
             
+            self.items.sort { $0.username < $1.username }
+            self.usersMasterList = self.items
+            
             DispatchQueue.main.async {
-                self.items.sort { $0.username < $1.username }
-                self.usersMasterList = self.items
                 self.collectionView.reloadData()
             }
         }
