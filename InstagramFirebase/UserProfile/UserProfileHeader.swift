@@ -8,6 +8,7 @@
 
 import UIKit
 import LBTATools
+import Firebase
 
 class UserProfileHeader: UICollectionReusableView {
     
@@ -19,6 +20,81 @@ class UserProfileHeader: UICollectionReusableView {
             imageView.loadImage(urlString: imageUrl)
             
             nameLabel.text = user?.username
+            
+            setupEditFollowButton()
+        }
+    }
+    
+    fileprivate func setupEditFollowButton() {
+        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+        guard let userId = user?.uid else { return }
+        
+        if currentUserId == userId {
+            editButton.setTitle("Edit Profile", for: .normal)
+        } else {
+            
+            // Checking if following already
+            Firestore.firestore().collection("following").document(currentUserId).getDocument { (snapshot, error) in
+                if let err = error {
+                    print("Failed to check if followed: ", err)
+                    return
+                }
+                
+                if let isFollowing = snapshot?.data()?[userId] as? Int, isFollowing == 1 {
+                    // Following
+                    self.setupFollowStyle(following: true)
+
+                } else {
+                    // Not following
+                    self.setupFollowStyle(following: false)
+                }
+            }
+        }
+        
+    }
+    
+    @objc func handleEditProfileOrFollow() {
+        guard let currentUserId = Auth.auth().currentUser?.uid  else { return }
+        guard let uid = user?.uid else { return }
+        
+        if editButton.titleLabel?.text == "Unfollow" {
+            Firestore.firestore().collection("following").document(currentUserId).updateData([uid : FieldValue.delete()]) { (error) in
+                if let err = error {
+                    print("Failed to unfollow: ", err)
+                    return
+                }
+                print("Successfully unfollowed user: ", self.user?.username ?? "")
+                
+                // Not following UI
+                self.setupFollowStyle(following: false)
+            }
+        } else {
+            let ref = Firestore.firestore().collection("following").document(currentUserId)
+            
+            ref.setData([uid : 1], merge: true) { (error) in
+                if let err = error {
+                    print("Failed to follow: ", err)
+                    return
+                }
+                
+                print("Successfully followed user: ", self.user?.username ?? "")
+                
+                self.setupFollowStyle(following: true)
+            }
+        }
+    }
+    
+    fileprivate func setupFollowStyle(following: Bool) {
+        if following {
+            // Update UI Following
+            self.editButton.setTitle("Unfollow", for: .normal)
+            self.editButton.backgroundColor = .clear
+            self.editButton.setTitleColor(.black, for: .normal)
+        } else {
+            // Not following UI
+            self.editButton.setTitle("Follow", for: .normal)
+            self.editButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+            self.editButton.setTitleColor(.white, for: .normal)
         }
     }
     
@@ -39,15 +115,18 @@ class UserProfileHeader: UICollectionReusableView {
 
     let editButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("Edit Profile", for: .normal)
-        button.setTitleColor(.black, for: .normal)
+        //button.setTitle("", for: .normal)
+        //button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = .boldSystemFont(ofSize: 14)
         button.layer.cornerRadius = 8
         button.layer.borderColor = UIColor(white: 0, alpha: 0.2).cgColor
         button.layer.borderWidth = 2
+        
+        button.addTarget(self, action: #selector(handleEditProfileOrFollow), for: .touchUpInside)
 
         return button
     }()
+    
     
     let gridButton: UIButton = {
         let button = UIButton(type: .system)

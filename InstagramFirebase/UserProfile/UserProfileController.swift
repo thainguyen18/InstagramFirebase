@@ -22,7 +22,6 @@ class PhotoCell: LBTAListCell<Post> {
     
     let imageView: CustomImageView = {
        let iv = CustomImageView()
-        iv.backgroundColor = .blue
         iv.contentMode = .scaleToFill
         iv.clipsToBounds = true
         
@@ -42,11 +41,7 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
         super.viewDidLoad()
         collectionView.backgroundColor = .white
         
-        navigationItem.title = "Some user"
-        
         fetchUser()
-        
-        //fetchPosts()
         
         setupLogOutButton()
     }
@@ -54,7 +49,8 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
     private var listener: ListenerRegistration?
     
     fileprivate func fetchPosts() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        guard let uid = self.user?.uid else { return }
         
         let ref = Firestore.firestore().collection("posts").document(uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 10)
         
@@ -135,9 +131,11 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
     }
     
     var user: User?
+    var userId: String? // Use this property to load selected user from search controller
     
     fileprivate func fetchUser() {
-        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        let uid = userId ?? Auth.auth().currentUser?.uid ?? ""
         
         Firestore.fetchUserWithUID(uid: uid) { (user) in
             self.user = user

@@ -8,8 +8,17 @@
 
 import UIKit
 import LBTATools
+import Firebase
 
-class UserSearchCell: LBTAListCell<String> {
+class UserSearchCell: LBTAListCell<User> {
+    
+    override var item: User! {
+        didSet {
+            profileImageView.loadImage(urlString: item.profileImageUrl)
+            
+            usernameLabel.text = item.username
+        }
+    }
     
     let profileImageView: CustomImageView = {
        let iv = CustomImageView()
@@ -22,7 +31,6 @@ class UserSearchCell: LBTAListCell<String> {
     
     let usernameLabel: UILabel = {
        let label = UILabel()
-        label.backgroundColor = .yellow
         label.font = .boldSystemFont(ofSize: 14)
         label.textColor = .black
         label.text = "Username"
@@ -31,7 +39,6 @@ class UserSearchCell: LBTAListCell<String> {
     
     let numberOfPostsLabel: UILabel = {
        let label = UILabel()
-        label.backgroundColor = .purple
         label.font = .systemFont(ofSize: 14)
         label.textColor = .lightGray
         label.text = "3 posts"
@@ -66,9 +73,9 @@ class UserSearchCell: LBTAListCell<String> {
     }
 }
 
-class SearchController: LBTAListController<UserSearchCell, String>, UICollectionViewDelegateFlowLayout {
+class SearchController: LBTAListController<UserSearchCell, User>, UICollectionViewDelegateFlowLayout, UISearchBarDelegate {
     
-    let searchBar: UISearchBar = {
+    lazy var searchBar: UISearchBar = {
         let sb = UISearchBar()
         sb.placeholder = "Enter username"
         UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self]).backgroundColor = UIColor.rgb(red: 230, green: 230, blue: 230)
@@ -83,13 +90,71 @@ class SearchController: LBTAListController<UserSearchCell, String>, UICollection
         
         navigationController?.navigationBar.addSubview(searchBar)
         
+        searchBar.delegate = self
+        
         let navBar = navigationController?.navigationBar
         
         searchBar.anchor(top: navBar?.topAnchor, leading: navBar?.leadingAnchor, bottom: navBar?.bottomAnchor, trailing: navBar?.trailingAnchor, padding: .init(top: 0, left: 8, bottom: 0, right: 8))
         
-        items = ["1", "2", "3", "4"]
-        
         collectionView.alwaysBounceVertical = true
+        collectionView.keyboardDismissMode = .onDrag
+        
+        fetchUsers()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            self.items = self.usersMasterList
+            return
+        }
+        
+        self.items = self.items.filter { $0.username.lowercased().contains(searchText.lowercased()) }
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        searchBar.isHidden = false
+    }
+    
+    private var usersMasterList = [User]()
+    
+    fileprivate func fetchUsers() {
+        Firestore.firestore().collection("users").getDocuments { (snapshot, error) in
+            if let err = error {
+                print("Failed to fetch users ", err)
+                return
+            }
+            
+            snapshot?.documents.forEach { document in
+                let user = User(uid: document.documentID, dictionary: document.data())
+                
+                // Remove ourselves the current user
+                if Auth.auth().currentUser?.uid == user.uid {
+                    return
+                }
+                
+                self.items.append(user)
+            }
+            
+            DispatchQueue.main.async {
+                self.items.sort { $0.username < $1.username }
+                self.usersMasterList = self.items
+                self.collectionView.reloadData()
+            }
+        }
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        searchBar.isHidden = true
+        searchBar.resignFirstResponder()
+        
+        let selectedUser = self.usersMasterList[indexPath.item]
+        
+        let userProfileController = UserProfileController()
+        userProfileController.userId = selectedUser.uid
+        
+        navigationController?.pushViewController(userProfileController, animated: true)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
