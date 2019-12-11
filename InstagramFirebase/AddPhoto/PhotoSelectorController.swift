@@ -119,9 +119,8 @@ class PhotoSelectorController: LBTAListHeaderController<ImageCell, UIImage, Phot
         let fetchOptions = PHFetchOptions()
         fetchOptions.fetchLimit = 15
         
-        // creation date does not work on simulator
-        //let sortDescriptor = NSSortDescriptor(key: "creationdate", ascending: false)
-        //fetchOptions.sortDescriptors = [sortDescriptor] // apply sort descriptor for real device
+        let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
+        fetchOptions.sortDescriptors = [sortDescriptor] 
         
         return fetchOptions
     }

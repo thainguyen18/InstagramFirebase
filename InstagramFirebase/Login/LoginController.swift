@@ -35,7 +35,7 @@ class LoginController: UIViewController {
         tf.backgroundColor = UIColor.init(white: 0, alpha: 0.03)
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
-        
+        tf.textColor = .black
         tf.addTarget(self, action: #selector(handleTextInput), for: .editingChanged)
         return tf
     }()
@@ -45,6 +45,7 @@ class LoginController: UIViewController {
         tf.backgroundColor = UIColor.init(white: 0, alpha: 0.03)
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
+        tf.textColor = .black
         tf.isSecureTextEntry = true
         tf.addTarget(self, action: #selector(handleTextInput), for: .editingChanged)
         return tf

@@ -153,21 +153,21 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
 
 
 
-struct UserProfilePreview: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            UserProfileViewContainer()
-                .navigationBarTitle("Some user", displayMode: .inline)
-        }
-    }
-    
-    struct UserProfileViewContainer: UIViewControllerRepresentable {
-        func updateUIViewController(_ uiViewController: UserProfilePreview.UserProfileViewContainer.UIViewControllerType, context: UIViewControllerRepresentableContext<UserProfilePreview.UserProfileViewContainer>) {
-            
-        }
-        
-        func makeUIViewController(context: UIViewControllerRepresentableContext<UserProfilePreview.UserProfileViewContainer>) -> UserProfileController {
-            return UserProfileController()
-        }
-    }
-}
+//struct UserProfilePreview: PreviewProvider {
+//    static var previews: some View {
+//        NavigationView {
+//            UserProfileViewContainer()
+//                .navigationBarTitle("Some user", displayMode: .inline)
+//        }
+//    }
+//    
+//    struct UserProfileViewContainer: UIViewControllerRepresentable {
+//        func updateUIViewController(_ uiViewController: UserProfilePreview.UserProfileViewContainer.UIViewControllerType, context: UIViewControllerRepresentableContext<UserProfilePreview.UserProfileViewContainer>) {
+//            
+//        }
+//        
+//        func makeUIViewController(context: UIViewControllerRepresentableContext<UserProfilePreview.UserProfileViewContainer>) -> UserProfileController {
+//            return UserProfileController()
+//        }
+//    }
+//}
