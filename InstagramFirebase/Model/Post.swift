@@ -16,6 +16,8 @@ struct Post {
     let imageHeight: Double
     let user: User
     
+    var id: String?
+    
     init(user: User, dictionary: [String: Any]) {
         self.imageUrl = dictionary["imageUrl"] as? String ?? ""
         self.caption = dictionary["caption"] as? String ?? ""

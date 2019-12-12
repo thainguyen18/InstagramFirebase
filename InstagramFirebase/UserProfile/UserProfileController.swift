@@ -80,10 +80,6 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
         }
     }
     
-    // Stop listening to database changes
-    deinit {
-        self.listener?.remove()
-    }
     
     fileprivate func setupLogOutButton() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "gear").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleLogOut))
@@ -100,6 +96,9 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
                 let nav = UINavigationController(rootViewController: loginController)
                 nav.modalPresentationStyle = .fullScreen
                 self.present(nav, animated: true)
+                
+                // Stop listening to database changes
+                self.listener?.remove()
                 
             } catch let signOutError {
                 print("Failed to sign out: ", signOutError)

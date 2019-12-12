@@ -11,8 +11,14 @@ import SwiftUI
 import LBTATools
 import Firebase
 
+protocol HomePostCellDelegate {
+    func didTapComment(post: Post)
+}
 
 class HomePostCell: LBTAListCell<Post> {
+    
+    var delegate: HomePostCellDelegate?
+    
     override var item: Post! {
         didSet {
             photoImageView.loadImage(urlString: item.imageUrl)
@@ -24,6 +30,10 @@ class HomePostCell: LBTAListCell<Post> {
             captionLabel.text = item.caption
             
             setupAttributedCaption()
+            
+            // Setup delegate to be parent viewcontroller
+            guard let homeController = parentController as? HomeController else { return }
+            delegate = homeController
         }
     }
     
@@ -84,12 +94,17 @@ class HomePostCell: LBTAListCell<Post> {
         return button
     }()
     
-    let commentButton: UIButton = {
+    lazy var commentButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "comment").withRenderingMode(.alwaysOriginal), for: .normal)
-        
+        button.addTarget(self, action: #selector(handleComment), for: .touchUpInside)
         return button
     }()
+    
+    @objc func handleComment() {
+        print("Handling comment...")
+        delegate?.didTapComment(post: self.item)
+    }
     
     let sendButton: UIButton = {
         let button = UIButton(type: .system)
@@ -156,7 +171,7 @@ class HomePostCell: LBTAListCell<Post> {
     }
 }
 
-class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDelegateFlowLayout {
+class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDelegateFlowLayout, HomePostCellDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -251,7 +266,9 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
             
             snapshot.documents.forEach { document in
                 
-                let post = Post(user: user, dictionary: document.data())
+                var post = Post(user: user, dictionary: document.data())
+                
+                post.id = document.documentID
                 
                 self.items.append(post)
             }
@@ -275,6 +292,15 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         height += 80 // caption
         
         return .init(width: view.frame.width, height: height)
+    }
+    
+    func didTapComment(post: Post) {
+        print("Coming from HomeController...")
+        
+        let commentsController = CommentsController()
+        commentsController.post = post
+        
+        navigationController?.pushViewController(commentsController, animated: true)
     }
 }
 
