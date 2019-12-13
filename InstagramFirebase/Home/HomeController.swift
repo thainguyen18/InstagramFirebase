@@ -17,12 +17,14 @@ protocol HomePostCellDelegate {
     func didLike(for cell: HomePostCell)
 }
 
+
 class HomePostCell: LBTAListCell<Post> {
     
     var delegate: HomePostCellDelegate?
     
     override var item: Post! {
         didSet {
+            
             photoImageView.loadImage(urlString: item.imageUrl)
             
             usernameLabel.text = item.user.username
@@ -288,7 +290,7 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                         return
                     }
                     
-                    if let value = snapshot?.data()?[uid] as? Int, value == 1 {
+                    if let _ = snapshot?.data()?[uid] {
                         post.hasLiked = true
                     }
                     

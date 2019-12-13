@@ -44,3 +44,9 @@ extension Date {
         
     }
 }
+
+extension UIColor {
+    static func mainBlue() -> UIColor {
+        return UIColor.rgb(red: 17, green: 154, blue: 237)
+    }
+}

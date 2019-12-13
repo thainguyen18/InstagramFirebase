@@ -12,34 +12,45 @@ import Firebase
 import LBTATools
 
 
-class PhotoCell: LBTAListCell<Post> {
+class UserProfilePhotoCell: LBTAListCell<Post> {
     override var item: Post! {
-        
         didSet {
             self.imageView.loadImage(urlString: item.imageUrl)
         }
     }
-    
+
     let imageView: CustomImageView = {
        let iv = CustomImageView()
         iv.contentMode = .scaleToFill
         iv.clipsToBounds = true
-        
+
         return iv
     }()
-    
+
     override func setupViews() {
         super.setupViews()
-        
+
         addSubview(imageView)
         imageView.fillSuperview()
     }
 }
 
-class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfileHeader>, UICollectionViewDelegateFlowLayout {
+class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post, UserProfileHeader>, UICollectionViewDelegateFlowLayout, UserProfileHeaderDelegate {
+    
+    var isGridView = true
+    
+    let cellId = "cellId"
+    let homePostCellId = "homePostCellId"
+   
+    
+    var posts = [Post]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         collectionView.backgroundColor = .white
+        
+        collectionView.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)
+        collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
         
         fetchUser()
         
@@ -111,15 +122,42 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
     
     override func setupHeader(_ header: UserProfileHeader) {
         header.user = self.user
+        
+        // Set up UserProfileController to be delegate
+        header.delegate = self
     }
+    
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
+        if isGridView {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! UserProfilePhotoCell
+            cell.item = self.items[indexPath.item]
+            return cell
+        } else {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
+            cell.item = self.items[indexPath.item]
+            return cell
+        }
+    }
+
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return .init(width: view.frame.width, height: 200)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = (view.frame.width - 2 * 1) / 3
-        return .init(width: width, height: width)
+        
+        if isGridView {
+            let width = (view.frame.width - 2 * 1) / 3
+            return .init(width: width, height: width)
+        } else {
+            var height: CGFloat = 40 + 8 * 2 // user profile image + gaps
+            height += view.frame.width
+            height += 50 // space for buttons
+            height += 80 // caption
+            
+            return .init(width: view.frame.width, height: height)
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
@@ -145,6 +183,16 @@ class UserProfileController: LBTAListHeaderController<PhotoCell, Post, UserProfi
             // Pass data after fetching and reload
             self.fetchPosts()
         }
+    }
+    
+    func didChangeToGridView() {
+        isGridView = true
+        collectionView.reloadData()
+    }
+    
+    func didChangeToListView() {
+        isGridView = false
+        collectionView.reloadData()
     }
 }
 

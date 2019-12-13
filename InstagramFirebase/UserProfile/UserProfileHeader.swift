@@ -10,7 +10,14 @@ import UIKit
 import LBTATools
 import Firebase
 
+protocol UserProfileHeaderDelegate {
+    func didChangeToListView()
+    func didChangeToGridView()
+}
+
 class UserProfileHeader: UICollectionReusableView {
+    
+    var delegate: UserProfileHeaderDelegate?
     
     var user: User? {
         didSet {
@@ -54,6 +61,9 @@ class UserProfileHeader: UICollectionReusableView {
     }
     
     @objc func handleEditProfileOrFollow() {
+        // If current user profile then return
+        if editButton.titleLabel?.text == "Edit Profile" { return }
+        
         guard let currentUserId = Auth.auth().currentUser?.uid  else { return }
         guard let uid = user?.uid else { return }
         
@@ -115,8 +125,6 @@ class UserProfileHeader: UICollectionReusableView {
 
     let editButton: UIButton = {
         let button = UIButton(type: .system)
-        //button.setTitle("", for: .normal)
-        //button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = .boldSystemFont(ofSize: 14)
         button.layer.cornerRadius = 8
         button.layer.borderColor = UIColor(white: 0, alpha: 0.2).cgColor
@@ -128,18 +136,34 @@ class UserProfileHeader: UICollectionReusableView {
     }()
     
     
-    let gridButton: UIButton = {
+    lazy var gridButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "grid"), for: .normal)
+        button.addTarget(self, action: #selector(handleChangeToGridView), for: .touchUpInside)
         return button
     }()
     
-    let listButton: UIButton = {
+    @objc func handleChangeToGridView() {
+        listButton.tintColor = UIColor(white: 0, alpha: 0.2)
+        gridButton.tintColor = .mainBlue()
+        
+        delegate?.didChangeToGridView()
+    }
+    
+    lazy var listButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "list"), for: .normal)
         button.tintColor = UIColor(white: 0, alpha: 0.2)
+        button.addTarget(self, action: #selector(handleChangeToListView), for: .touchUpInside)
         return button
     }()
+    
+    @objc func handleChangeToListView() {
+        listButton.tintColor = UIColor.mainBlue()
+        gridButton.tintColor = UIColor(white: 0, alpha: 0.2)
+        
+        delegate?.didChangeToListView()
+    }
     
     let ribbonButton: UIButton = {
         let button = UIButton(type: .system)
