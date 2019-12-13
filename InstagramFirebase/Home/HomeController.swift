@@ -13,6 +13,8 @@ import Firebase
 
 protocol HomePostCellDelegate {
     func didTapComment(post: Post)
+    
+    func didLike(for cell: HomePostCell)
 }
 
 class HomePostCell: LBTAListCell<Post> {
@@ -34,6 +36,8 @@ class HomePostCell: LBTAListCell<Post> {
             // Setup delegate to be parent viewcontroller
             guard let homeController = parentController as? HomeController else { return }
             delegate = homeController
+            
+            likeButton.setImage(item.hasLiked ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
         }
     }
     
@@ -87,12 +91,17 @@ class HomePostCell: LBTAListCell<Post> {
         return button
     }()
     
-    let likeButton: UIButton = {
+    lazy var likeButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleLike), for: .touchUpInside)
         
         return button
     }()
+    
+    @objc func handleLike() {
+        delegate?.didLike(for: self)
+    }
     
     lazy var commentButton: UIButton = {
         let button = UIButton(type: .system)
@@ -270,19 +279,34 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                 
                 post.id = document.documentID
                 
-                self.items.append(post)
-            }
-            
-            print(self.items.count)
-            
-            self.items.sort { $0.creationDate > $1.creationDate }
-            
-            DispatchQueue.main.async {
+                // Check if current user liked this post
+                guard let uid = Auth.auth().currentUser?.uid else { return }
                 
-                self.collectionView.reloadData()
+                Firestore.firestore().collection("likes").document(document.documentID).getDocument { (snapshot, error) in
+                    if let err = error {
+                        print("Failed to fetch likes ", err)
+                        return
+                    }
+                    
+                    if let value = snapshot?.data()?[uid] as? Int, value == 1 {
+                        post.hasLiked = true
+                    }
+                    
+                    self.items.append(post)
+                    
+                    print(self.items.count)
+                    
+                    self.items.sort { $0.creationDate > $1.creationDate }
+                    
+                    DispatchQueue.main.async {
+                        
+                        self.collectionView.reloadData()
+                    }
+                }
             }
         }
     }
+    
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
@@ -295,12 +319,55 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     }
     
     func didTapComment(post: Post) {
-        print("Coming from HomeController...")
         
         let commentsController = CommentsController()
         commentsController.post = post
         
         navigationController?.pushViewController(commentsController, animated: true)
+    }
+    
+    func didLike(for cell: HomePostCell) {
+        guard let indexPath = collectionView.indexPath(for: cell) else { return }
+        
+        var post = self.items[indexPath.item]
+        
+        guard let postId = post.id else { return }
+        
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        //Toggle the like button
+        post.hasLiked = !post.hasLiked
+        
+        // Because of struct value, we need to set the value in array to this modified value
+        self.items[indexPath.item] = post
+        
+        if cell.item.hasLiked {
+            Firestore.firestore().collection("likes").document(postId).updateData([uid : FieldValue.delete()]) { (error) in
+                if let err = error {
+                    print("Failed to unlike: ", err)
+                    return
+                }
+                
+                print("Successfully unliked")
+                
+                DispatchQueue.main.async {
+                    self.collectionView.reloadItems(at: [indexPath])
+                }
+            }
+        } else {
+            Firestore.firestore().collection("likes").document(postId).setData([uid : 1], merge: true) { (error) in
+                if let err = error {
+                    print("Failed to like: ", err)
+                    return
+                }
+                
+                print("Successfully liked")
+                
+                DispatchQueue.main.async {
+                    self.collectionView.reloadItems(at: [indexPath])
+                }
+            }
+        }
     }
 }
 

@@ -57,7 +57,7 @@ class CommentCell: LBTAListCell<Comment> {
     }
 }
 
-class CommentsController: LBTAListController<CommentCell, Comment>, UICollectionViewDelegateFlowLayout {
+class CommentsController: LBTAListController<CommentCell, Comment>, UICollectionViewDelegateFlowLayout, UITextFieldDelegate {
     
     var post: Post?
     
@@ -73,11 +73,9 @@ class CommentsController: LBTAListController<CommentCell, Comment>, UICollection
         collectionView.contentInset = .init(top: 0, left: 0, bottom: 50, right: 0)
         collectionView.scrollIndicatorInsets = .init(top: 0, left: 0, bottom: 50, right: 0)
         
+        commentTextField.delegate = self
         
         fetchComments()
-        
-        // Listen to keyboard notification to scroll to bottom of collection view
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardShow), name: UIResponder.keyboardDidShowNotification, object: nil)
     }
     
     @objc func handleKeyboardShow() {
@@ -183,6 +181,11 @@ class CommentsController: LBTAListController<CommentCell, Comment>, UICollection
         
         return tf
     }()
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        // Listen to keyboard notification to scroll to bottom of collection view
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardShow), name: UIResponder.keyboardDidShowNotification, object: nil)
+    }
     
     @objc func handleSubmit() {
         guard let postId = self.post?.id else { return }
