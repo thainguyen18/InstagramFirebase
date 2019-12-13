@@ -49,21 +49,125 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
         super.viewDidLoad()
         collectionView.backgroundColor = .white
         
+        //collectionView.alwaysBounceVertical = true
+        
         collectionView.register(UserProfilePhotoCell.self, forCellWithReuseIdentifier: cellId)
         collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: homePostCellId)
+        
+        let refreshControll = UIRefreshControl()
+        refreshControll.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView.refreshControl = refreshControll
         
         fetchUser()
         
         setupLogOutButton()
+        
+         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdatePosts), name: SharePhotoController.updateFeedNotificationName, object: nil)
     }
+    
+    @objc func handleRefresh() {
+        paginatePosts()
+    }
+    
+    @objc func handleUpdatePosts() {
+        print("Hey there is a new post please update it")
+        isFinished = false
+        //paginatePosts()
+        
+        fetchPosts()
+    }
+    
+    
     
     private var listener: ListenerRegistration?
     
+    private var lastSnapshot: QueryDocumentSnapshot?
+    
+    private var isFinished = false
+    
+    fileprivate func paginatePosts() {
+        guard let uid = self.user?.uid else { return }
+        
+        guard let user = self.user else { return }
+        
+        guard !isFinished else {
+            print("No new items...")
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                self.collectionView.refreshControl?.endRefreshing()
+            }
+            
+            return
+        }
+        
+        let refDB = Firestore.firestore().collection("posts").document(uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 4)
+        
+        if let lastSnapshot = self.lastSnapshot {
+            
+            // Subsequence fetch i.e pagination
+            refDB.start(afterDocument: lastSnapshot).getDocuments { (snapshot, error) in
+                if let err = error {
+                    print("Failed to fetch user posts: ", err)
+                    return
+                }
+                
+                self.collectionView.refreshControl?.endRefreshing()
+                
+                self.lastSnapshot = snapshot?.documents.last
+                
+                if let snapshot = snapshot, snapshot.documents.count < 4 {
+                
+                    self.isFinished = true
+                }
+                
+                snapshot?.documents.forEach { document in
+                    let post = Post(user: user, dictionary: document.data())
+                    
+                    self.items.append(post)
+                }
+                
+                self.items.sort { $0.creationDate > $1.creationDate }
+                
+                DispatchQueue.main.async {
+                    
+                    self.collectionView.reloadData()
+                }
+            }
+        } else {
+            // Initial fetch
+            
+            refDB.getDocuments { (snapshot, error) in
+                if let err = error {
+                    print("Failed to fetch user posts: ", err)
+                    return
+                }
+                
+                self.collectionView.refreshControl?.endRefreshing()
+                
+                self.lastSnapshot = snapshot?.documents.last
+                
+                snapshot?.documents.forEach { document in
+                    let post = Post(user: user, dictionary: document.data())
+                    
+                    self.items.append(post)
+                }
+                
+                self.items.sort { $0.creationDate > $1.creationDate }
+                
+                DispatchQueue.main.async {
+                    
+                    self.collectionView.reloadData()
+                }
+            }
+        }
+    }
+    
+    // Using this fetch to get the most recent post 
     fileprivate func fetchPosts() {
         
         guard let uid = self.user?.uid else { return }
         
-        let ref = Firestore.firestore().collection("posts").document(uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 10)
+        let ref = Firestore.firestore().collection("posts").document(uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 1)
         
         self.listener = ref.addSnapshotListener { (querySnapshot, error) in
             if let err = error {
@@ -86,6 +190,8 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
             DispatchQueue.main.async {
                 
                 self.collectionView.reloadData()
+                
+                self.listener?.remove()
             }
             
         }
@@ -181,7 +287,10 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
             self.navigationItem.title = self.user?.username
             
             // Pass data after fetching and reload
-            self.fetchPosts()
+            
+            //self.fetchPosts()
+            
+            self.paginatePosts()
         }
     }
     
