@@ -296,8 +296,6 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                     
                     self.items.append(post)
                     
-                    print(self.items.count)
-                    
                     self.items.sort { $0.creationDate > $1.creationDate }
                     
                     DispatchQueue.main.async {

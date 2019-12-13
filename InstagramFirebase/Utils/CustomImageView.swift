@@ -46,7 +46,5 @@ class CustomImageView: UIImageView {
                 self.image = photoImage
             }
         }.resume()
-        
-        print("loading image...")
     }
 }

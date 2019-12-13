@@ -93,6 +93,8 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
         guard !isFinished else {
             print("No new items...")
             
+            isLoading = false
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 self.collectionView.refreshControl?.endRefreshing()
             }
@@ -100,7 +102,7 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
             return
         }
         
-        let refDB = Firestore.firestore().collection("posts").document(uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 4)
+        let refDB = Firestore.firestore().collection("posts").document(uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 6)
         
         if let lastSnapshot = self.lastSnapshot {
             
@@ -128,8 +130,11 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
                 
                 self.items.sort { $0.creationDate > $1.creationDate }
                 
-                DispatchQueue.main.async {
-                    
+                print(self.items.map {$0.creationDate})
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self.isLoading = false
+
                     self.collectionView.reloadData()
                 }
             }
@@ -154,15 +159,42 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
                 
                 self.items.sort { $0.creationDate > $1.creationDate }
                 
-                DispatchQueue.main.async {
-                    
+                print(self.items.map {$0.creationDate})
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    self.isLoading = false
+
                     self.collectionView.reloadData()
                 }
             }
         }
     }
     
-    // Using this fetch to get the most recent post 
+    private var isLoading = false
+    
+//    override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+//        let cellBottom = cell.frame.origin.y
+//
+//        print(collectionView.frame.height, cellBottom)
+//
+//        // Checking if last cell does not fill current visible view then fetch more
+//        if indexPath.item == self.items.count - 1 && !isLoading && (collectionView.frame.height - cellBottom > 100){
+//            isLoading = true
+//            paginatePosts()
+//        }
+//
+//
+//    }
+    
+    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.y > -60 && !isLoading {
+            isLoading = true
+            paginatePosts()
+        }
+    }
+    
+    
+    // Using this fetch to get the most recent post
     fileprivate func fetchPosts() {
         
         guard let uid = self.user?.uid else { return }
