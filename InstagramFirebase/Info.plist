@@ -20,6 +20,10 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>We need to access to camera to take photos</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need access to your photo library to make profile image</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -56,9 +60,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need access to your photo library to make profile image</string>
-	<key>NSCameraUsageDescription</key>
-	<string>We need to access to camera to take photos</string>
 </dict>
 </plist>

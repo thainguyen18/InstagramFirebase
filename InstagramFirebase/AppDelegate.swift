@@ -7,15 +7,62 @@
 //
 
 import UIKit
+import UserNotifications
+import Firebase
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate, MessagingDelegate {
 
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        FirebaseApp.configure()
+        
+        attemptToRegisterForNotifications(application)
+        
         return true
+    }
+    
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String) {
+        print("Registered with FCM with token:", fcmToken)
+    }
+    
+    fileprivate func  attemptToRegisterForNotifications(_ application: UIApplication) {
+        
+        UNUserNotificationCenter.current().delegate = self
+        
+        Messaging.messaging().delegate = self
+        
+        // User authorization for notifications
+        let options: UNAuthorizationOptions = [.alert, .badge, .sound]
+        UNUserNotificationCenter.current().requestAuthorization(options: options) { (granted, error) in
+            if let err = error {
+                print("Unable to obtain user authorization for notifications ", err)
+                return
+            }
+            
+            if granted {
+                print("Granted")
+                
+                DispatchQueue.main.async {
+                    application.registerForRemoteNotifications()
+                }
+                
+            } else {
+                print("Denied")
+            }
+        }
+    }
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        print("Registered for remote notification with device token: ", deviceToken)
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        
+        completionHandler(.alert)
     }
 
     // MARK: UISceneSession Lifecycle

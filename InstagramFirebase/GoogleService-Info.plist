@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>436674021698-lsi2gb230e4o9peqlk91lngfim2g17i8.apps.googleusercontent.com</string>
+	<string>898331466908-cebelsehct0tpm90d4se6nneelqdh99b.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.436674021698-lsi2gb230e4o9peqlk91lngfim2g17i8</string>
+	<string>com.googleusercontent.apps.898331466908-cebelsehct0tpm90d4se6nneelqdh99b</string>
 	<key>API_KEY</key>
-	<string>AIzaSyB5RDIOR9HahrrTOMut6f98pMO-vIjKhOQ</string>
+	<string>AIzaSyBEA08viRmvr0GZlyAEseKtKE3o5et2270</string>
 	<key>GCM_SENDER_ID</key>
-	<string>436674021698</string>
+	<string>898331466908</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.thainguyen.InstagramFirebase</string>
+	<string>com.thainguyen.InstagramFirebaseApp</string>
 	<key>PROJECT_ID</key>
-	<string>instagramfirebase-4fc6e</string>
+	<string>instagramfirebaseapp-1c728</string>
 	<key>STORAGE_BUCKET</key>
-	<string>instagramfirebase-4fc6e.appspot.com</string>
+	<string>instagramfirebaseapp-1c728.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,8 +29,8 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:436674021698:ios:b1a0906faaa3264bbea0db</string>
+	<string>1:898331466908:ios:07a74414bbaa0a3c44e159</string>
 	<key>DATABASE_URL</key>
-	<string>https://instagramfirebase-4fc6e.firebaseio.com</string>
+	<string>https://instagramfirebaseapp-1c728.firebaseio.com</string>
 </dict>
 </plist>
