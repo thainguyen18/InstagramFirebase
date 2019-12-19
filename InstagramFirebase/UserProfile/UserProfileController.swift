@@ -117,7 +117,7 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
                 
                 self.lastSnapshot = snapshot?.documents.last
                 
-                if let snapshot = snapshot, snapshot.documents.count < 4 {
+                if let snapshot = snapshot, snapshot.documents.count < 6 {
                 
                     self.isFinished = true
                 }
@@ -169,6 +169,7 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
             }
         }
     }
+    
     
     private var isLoading = false
     
