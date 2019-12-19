@@ -41,19 +41,38 @@ class UserProfileHeader: UICollectionReusableView {
         } else {
             
             // Checking if following already
-            Firestore.firestore().collection("following").document(currentUserId).getDocument { (snapshot, error) in
+//            Firestore.firestore().collection("following").document(currentUserId).getDocument { (snapshot, error) in
+//                if let err = error {
+//                    print("Failed to check if followed: ", err)
+//                    return
+//                }
+//
+//                if let isFollowing = snapshot?.data()?[userId] as? Int, isFollowing == 1 {
+//                    // Following
+//                    self.setupFollowStyle(following: true)
+//
+//                } else {
+//                    // Not following
+//                    self.setupFollowStyle(following: false)
+//                }
+//            }
+            
+            Firestore.firestore().collection("following").document(currentUserId).collection("follows").getDocuments { (querySnapshot, error) in
                 if let err = error {
                     print("Failed to check if followed: ", err)
                     return
                 }
                 
-                if let isFollowing = snapshot?.data()?[userId] as? Int, isFollowing == 1 {
-                    // Following
-                    self.setupFollowStyle(following: true)
-
-                } else {
-                    // Not following
-                    self.setupFollowStyle(following: false)
+                // Not following
+                self.setupFollowStyle(following: false)
+                
+                querySnapshot?.documents.forEach { document in
+                    if document.documentID == userId {
+                        // Following
+                        self.setupFollowStyle(following: true)
+                        
+                        return
+                    }
                 }
             }
         }
@@ -68,7 +87,20 @@ class UserProfileHeader: UICollectionReusableView {
         guard let uid = user?.uid else { return }
         
         if editButton.titleLabel?.text == "Unfollow" {
-            Firestore.firestore().collection("following").document(currentUserId).updateData([uid : FieldValue.delete()]) { (error) in
+//            Firestore.firestore().collection("following").document(currentUserId).updateData([uid : FieldValue.delete()]) { (error) in
+//                if let err = error {
+//                    print("Failed to unfollow: ", err)
+//                    return
+//                }
+//                print("Successfully unfollowed user: ", self.user?.username ?? "")
+//
+//                // Not following UI
+//                self.setupFollowStyle(following: false)
+//            }
+            
+            let ref = Firestore.firestore().collection("following").document(currentUserId).collection("follows")
+            
+            ref.document(uid).delete { (error) in
                 if let err = error {
                     print("Failed to unfollow: ", err)
                     return
@@ -79,18 +111,29 @@ class UserProfileHeader: UICollectionReusableView {
                 self.setupFollowStyle(following: false)
             }
         } else {
-            let ref = Firestore.firestore().collection("following").document(currentUserId)
+            let ref = Firestore.firestore().collection("following").document(currentUserId).collection("follows")
             
-            ref.setData([uid : 1], merge: true) { (error) in
+            ref.document(uid).setData([:]) { (error) in
                 if let err = error {
-                    print("Failed to follow: ", err)
-                    return
+                        print("Failed to follow: ", err)
+                        return
+                    }
+                    
+                    print("Successfully followed user: ", self.user?.username ?? "")
+                    
+                    self.setupFollowStyle(following: true)
                 }
-                
-                print("Successfully followed user: ", self.user?.username ?? "")
-                
-                self.setupFollowStyle(following: true)
-            }
+            
+//            ref.setData([uid : 1], merge: true) { (error) in
+//                if let err = error {
+//                    print("Failed to follow: ", err)
+//                    return
+//                }
+//
+//                print("Successfully followed user: ", self.user?.username ?? "")
+//
+//                self.setupFollowStyle(following: true)
+//            }
         }
     }
     

@@ -161,10 +161,12 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
                     // User database
                     guard let uid = result?.user.uid else { return }
                     guard let username = self.usernameTextField.text else { return }
+                    guard let fcmToken = Messaging.messaging().fcmToken else { return }
                     
                     Firestore.firestore().collection("users").document(uid).setData(
                         ["username": username,
-                         "profileImageUrl": profileImageUrl.absoluteString],
+                         "profileImageUrl": profileImageUrl.absoluteString,
+                         "fcmToken": fcmToken],
                         completion: { (err) in
                         if let err = err {
                             print("Failed to save user info into db: ", err)
