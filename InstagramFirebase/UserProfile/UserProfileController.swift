@@ -63,6 +63,8 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
         setupLogOutButton()
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdatePosts), name: SharePhotoController.updateFeedNotificationName, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateHeader), name: UserProfileHeader.updateHeaderData, object: nil)
     }
     
     @objc func handleRefresh() {
@@ -75,6 +77,34 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
         //paginatePosts()
         
         fetchPosts()
+    }
+    
+    
+    @objc func handleUpdateHeader() {
+        // Update number of posts to user database
+        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+        
+        let ref = Firestore.firestore().collection("users").document(currentUserId)
+        
+        ref.getDocument { (snapshot, error) in
+            if let err = error {
+                print("Failed to update number of posts: ", err)
+                return
+            }
+            
+            guard let numberOfPosts = snapshot?.data()?["numberOfPosts"] as? Int else { return }
+            
+            Firestore.firestore().collection("users").document(currentUserId).updateData(["numberOfPosts" : numberOfPosts + 1]) { (error) in
+                if let err = error {
+                    print("Failed to update number of posts: ", err)
+                    return
+                }
+                
+                DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+                }
+            }
+        }
     }
     
     

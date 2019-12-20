@@ -17,6 +17,16 @@ class UserSearchCell: LBTAListCell<User> {
             profileImageView.loadImage(urlString: item.profileImageUrl)
             
             usernameLabel.text = item.username
+            
+            var text = "\(item.numberOfPosts)"
+            
+            if item.numberOfPosts == 1 || item.numberOfPosts == 0 {
+                text.append(" post")
+            } else {
+                text.append(" posts")
+            }
+            
+            numberOfPostsLabel.text = text
         }
     }
     
@@ -41,7 +51,7 @@ class UserSearchCell: LBTAListCell<User> {
        let label = UILabel()
         label.font = .systemFont(ofSize: 14)
         label.textColor = .lightGray
-        label.text = "3 posts"
+        label.text = "0 posts"
         return label
     }()
     

@@ -37,15 +37,9 @@ class UserProfileHeader: UICollectionReusableView {
             fetchNumberOfFollowers()
             
             fetchNumberOfFollowings()
-            
-            // Listen to changes across the application and update UI
-            NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateHeaderData), name: UserProfileHeader.updateHeaderData, object: nil)
         }
     }
     
-    @objc fileprivate func handleUpdateHeaderData() {
-        
-    }
     
     fileprivate func fetchNumberOfPosts() {
         
@@ -154,6 +148,9 @@ class UserProfileHeader: UICollectionReusableView {
                 }
                 print(self.user?.username ?? "", "lost a follower")
             }
+            
+            
+            
         } else {
             let ref = Firestore.firestore().collection("following").document(currentUserId).collection("follows")
             
@@ -179,6 +176,9 @@ class UserProfileHeader: UICollectionReusableView {
             }
            
         }
+        
+        // Post notification for updating data on header
+        NotificationCenter.default.post(name: UserProfileHeader.updateHeaderData, object: nil)
     }
     
     fileprivate func setupFollowStyle(following: Bool) {
