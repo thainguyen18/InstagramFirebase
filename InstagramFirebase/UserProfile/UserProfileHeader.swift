@@ -19,6 +19,8 @@ class UserProfileHeader: UICollectionReusableView {
     
     var delegate: UserProfileHeaderDelegate?
     
+    static let updateHeaderData = Notification.Name("updateData")
+    
     var user: User? {
         didSet {
             
@@ -29,6 +31,65 @@ class UserProfileHeader: UICollectionReusableView {
             nameLabel.text = user?.username
             
             setupEditFollowButton()
+            
+            fetchNumberOfPosts()
+            
+            fetchNumberOfFollowers()
+            
+            fetchNumberOfFollowings()
+            
+            // Listen to changes across the application and update UI
+            NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateHeaderData), name: UserProfileHeader.updateHeaderData, object: nil)
+        }
+    }
+    
+    @objc fileprivate func handleUpdateHeaderData() {
+        
+    }
+    
+    fileprivate func fetchNumberOfPosts() {
+        
+        guard let userId = user?.uid else { return }
+        
+        Firestore.firestore().collection("posts").document(userId).collection("userposts").getDocuments { (querySnapshot, error) in
+            if let err = error {
+                print("Failed to fetch user posts: ", err)
+                return
+            }
+            
+            let numberOfPosts = querySnapshot?.documents.count ?? 0
+            
+            self.postsLabel.text = "\(numberOfPosts)"
+        }
+    }
+    
+    fileprivate func fetchNumberOfFollowers() {
+        guard let userId = user?.uid else { return }
+        
+        Firestore.firestore().collection("followers").document(userId).collection("followedBy").getDocuments { (querySnapshot, error) in
+            if let err = error {
+                print("Failed to fetch user followed: ", err)
+                return
+            }
+            
+            let numberOfFollowers = querySnapshot?.documents.count ?? 0
+            
+            self.followersLabel.text = "\(numberOfFollowers)"
+        }
+    }
+    
+    fileprivate func fetchNumberOfFollowings() {
+        guard let userId = user?.uid else { return }
+        
+        Firestore.firestore().collection("following").document(userId).collection("follows").getDocuments { (querySnapshot, error) in
+            if let err = error {
+                print("Failed to fetch user followings: ", err)
+                return
+            }
+            
+            let numberOfFollowings = querySnapshot?.documents.count ?? 0
+            
+            self.followingLabel.text = "\(numberOfFollowings)"
         }
     }
     
@@ -40,23 +101,7 @@ class UserProfileHeader: UICollectionReusableView {
             editButton.setTitle("Edit Profile", for: .normal)
         } else {
             
-            // Checking if following already
-//            Firestore.firestore().collection("following").document(currentUserId).getDocument { (snapshot, error) in
-//                if let err = error {
-//                    print("Failed to check if followed: ", err)
-//                    return
-//                }
-//
-//                if let isFollowing = snapshot?.data()?[userId] as? Int, isFollowing == 1 {
-//                    // Following
-//                    self.setupFollowStyle(following: true)
-//
-//                } else {
-//                    // Not following
-//                    self.setupFollowStyle(following: false)
-//                }
-//            }
-            
+            // Check for following info
             Firestore.firestore().collection("following").document(currentUserId).collection("follows").getDocuments { (querySnapshot, error) in
                 if let err = error {
                     print("Failed to check if followed: ", err)
@@ -87,17 +132,7 @@ class UserProfileHeader: UICollectionReusableView {
         guard let uid = user?.uid else { return }
         
         if editButton.titleLabel?.text == "Unfollow" {
-//            Firestore.firestore().collection("following").document(currentUserId).updateData([uid : FieldValue.delete()]) { (error) in
-//                if let err = error {
-//                    print("Failed to unfollow: ", err)
-//                    return
-//                }
-//                print("Successfully unfollowed user: ", self.user?.username ?? "")
-//
-//                // Not following UI
-//                self.setupFollowStyle(following: false)
-//            }
-            
+
             let ref = Firestore.firestore().collection("following").document(currentUserId).collection("follows")
             
             ref.document(uid).delete { (error) in
@@ -110,30 +145,39 @@ class UserProfileHeader: UICollectionReusableView {
                 // Not following UI
                 self.setupFollowStyle(following: false)
             }
+            
+            // Remove data from followers database
+            Firestore.firestore().collection("followers").document(uid).collection("followedBy").document(currentUserId).delete { (error) in
+                if let err = error {
+                    print("Failed to unfollow: ", err)
+                    return
+                }
+                print(self.user?.username ?? "", "lost a follower")
+            }
         } else {
             let ref = Firestore.firestore().collection("following").document(currentUserId).collection("follows")
             
             ref.document(uid).setData([:]) { (error) in
                 if let err = error {
-                        print("Failed to follow: ", err)
-                        return
-                    }
-                    
-                    print("Successfully followed user: ", self.user?.username ?? "")
-                    
-                    self.setupFollowStyle(following: true)
+                    print("Failed to follow: ", err)
+                    return
                 }
+                
+                print("Successfully followed user: ", self.user?.username ?? "")
+                
+                self.setupFollowStyle(following: true)
+            }
             
-//            ref.setData([uid : 1], merge: true) { (error) in
-//                if let err = error {
-//                    print("Failed to follow: ", err)
-//                    return
-//                }
-//
-//                print("Successfully followed user: ", self.user?.username ?? "")
-//
-//                self.setupFollowStyle(following: true)
-//            }
+            // Push data to followers database
+            Firestore.firestore().collection("followers").document(uid).collection("followedBy").document(currentUserId).setData([:]) { (error) in
+                if let err = error {
+                    print("Failed to follow: ", err)
+                    return
+                }
+                
+                print(self.user?.username ?? "", " had a new follower: ", currentUserId)
+            }
+           
         }
     }
     
@@ -160,7 +204,7 @@ class UserProfileHeader: UICollectionReusableView {
 
     let nameLabel = UILabel(text: "username", font: .boldSystemFont(ofSize: 14), textColor: .black, textAlignment: .center, numberOfLines: 0)
 
-    let postsLabel = UILabel(text: "10", font: .boldSystemFont(ofSize: 14), textColor: .black, textAlignment: .center, numberOfLines: 1)
+    let postsLabel = UILabel(text: "0", font: .boldSystemFont(ofSize: 14), textColor: .black, textAlignment: .center, numberOfLines: 1)
 
     let followersLabel = UILabel(text: "0", font: .boldSystemFont(ofSize: 14), textColor: .black, textAlignment: .center, numberOfLines: 1)
 

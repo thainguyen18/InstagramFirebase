@@ -62,7 +62,7 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
         
         setupLogOutButton()
         
-         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdatePosts), name: SharePhotoController.updateFeedNotificationName, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleUpdatePosts), name: SharePhotoController.updateFeedNotificationName, object: nil)
     }
     
     @objc func handleRefresh() {
