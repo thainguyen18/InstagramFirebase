@@ -117,6 +117,12 @@ class LoginController: UIViewController {
         setupForm()
     }
     
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        
+        self.view.endEditing(true)
+    }
+    
     fileprivate func setupForm() {
         view.addSubview(dontHaveAnAccountButton)
         

@@ -207,6 +207,14 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         alreadyHaveAnAccountButton.anchor(top: nil, leading: view.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 0), size: .init(width: 0, height: 40))
     }
     
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesEnded(touches, with: event)
+        
+        self.view.endEditing(true)
+    }
+    
+    
     fileprivate func setUpInputFields() {
         let stackViews = UIStackView(arrangedSubviews: [emailTextField, usernameTextField, passwordTextField, signupButton])
         stackViews.axis = .vertical
