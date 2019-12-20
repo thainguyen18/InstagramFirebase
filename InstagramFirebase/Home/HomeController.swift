@@ -120,14 +120,17 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                 // Check if current user liked this post
                 guard let uid = Auth.auth().currentUser?.uid else { return }
                 
-                Firestore.firestore().collection("likes").document(document.documentID).getDocument { (snapshot, error) in
+                Firestore.firestore().collection("likes").document(uid).collection("postsLike").getDocuments { (snapshot, error) in
                     if let err = error {
                         print("Failed to fetch likes ", err)
                         return
                     }
                     
-                    if let _ = snapshot?.data()?[uid] {
-                        post.hasLiked = true
+                    snapshot?.documents.forEach { document in
+                        if document.documentID == post.id {
+                            post.hasLiked = true
+                            return
+                        }
                     }
                     
                     self.items.append(post)
@@ -185,8 +188,10 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         // Because of struct value, we need to set the value in array to this modified value
         self.items[indexPath.item] = post
         
+        let ref = Firestore.firestore().collection("likes").document(uid).collection("postsLike").document(postId)
+        
         if cell.item.hasLiked {
-            Firestore.firestore().collection("likes").document(postId).updateData([uid : FieldValue.delete()]) { (error) in
+            ref.delete() { (error) in
                 if let err = error {
                     print("Failed to unlike: ", err)
                     return
@@ -199,7 +204,7 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                 }
             }
         } else {
-            Firestore.firestore().collection("likes").document(postId).setData([uid : 1], merge: true) { (error) in
+            ref.setData([:]) { (error) in
                 if let err = error {
                     print("Failed to like: ", err)
                     return
