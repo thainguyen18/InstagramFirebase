@@ -64,7 +64,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         
-        completionHandler(.alert)
+        completionHandler([.alert, .sound])
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        
+        // Reset badge to 0
+        UIApplication.shared.applicationIconBadgeNumber = 0
+        
+        let userInfo = response.notification.request.content.userInfo
+        
+        if let followerId = userInfo["followerId"] as? String {
+            
+            // Create user profile controller with follower id
+            let userProfileController = UserProfileController()
+            userProfileController.userId = followerId
+            
+            // Access main UI from AppDelegate
+            let window = UIApplication.shared.windows.filter{$0.isKeyWindow}.first
+            if let mainTabBarController = window?.rootViewController as? MainTabBarController {
+                mainTabBarController.selectedIndex = 0
+                
+                // Dismiss any view controller (Photo selector view controller) in motion
+                mainTabBarController.presentedViewController?.dismiss(animated: true)
+                
+                if let homeNav = mainTabBarController.viewControllers?.first as? UINavigationController {
+                    homeNav.pushViewController(userProfileController, animated: true)
+                }
+            }
+        }
     }
 
     // MARK: UISceneSession Lifecycle

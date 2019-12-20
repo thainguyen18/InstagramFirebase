@@ -57,7 +57,7 @@ class CommentCell: LBTAListCell<Comment> {
     }
 }
 
-class CommentsController: LBTAListController<CommentCell, Comment>, UICollectionViewDelegateFlowLayout, UITextFieldDelegate {
+class CommentsController: LBTAListController<CommentCell, Comment>, UICollectionViewDelegateFlowLayout, CommentInputAccessoryViewDelegate {
     
     var post: Post?
     
@@ -73,7 +73,8 @@ class CommentsController: LBTAListController<CommentCell, Comment>, UICollection
         collectionView.contentInset = .init(top: 0, left: 0, bottom: 50, right: 0)
         collectionView.scrollIndicatorInsets = .init(top: 0, left: 0, bottom: 50, right: 0)
         
-        commentTextField.delegate = self
+        // Listen to keyboard notification to scroll to bottom of collection view
+        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardShow), name: UITextView.textDidBeginEditingNotification, object: nil)
         
         fetchComments()
     }
@@ -112,7 +113,7 @@ class CommentsController: LBTAListController<CommentCell, Comment>, UICollection
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let frame = containerView.frame
+        let frame = commentInputAccessoryView.frame
         
         let dummyCell = CommentCell(frame: frame)
         dummyCell.item = self.items[indexPath.item]
@@ -124,11 +125,13 @@ class CommentsController: LBTAListController<CommentCell, Comment>, UICollection
         return .init(width: view.frame.width, height: max(40 + 8 * 2, estimatedSize.height))
     }
     
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         tabBarController?.tabBar.isHidden = true
     }
+    
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -142,61 +145,30 @@ class CommentsController: LBTAListController<CommentCell, Comment>, UICollection
         NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardDidShowNotification, object: nil)
     }
     
-    lazy var containerView: ContainerView = {
-        let containerView = ContainerView()
+    
+    lazy var commentInputAccessoryView: CommentInputAccessoryView = {
+        
+        let frame = CGRect(x: 0, y: 0, width: 100, height: 50)
+        
+        let containerView = CommentInputAccessoryView(frame: frame)
+        
         containerView.backgroundColor = .white
         
-        containerView.frame = CGRect(x: 0, y: 0, width: 100, height: 50)
-        
-        let height = containerView.frame.height + 34 //34 is bottom safe area layout for iphone X
-        
-        let fillerView = UIView()
-        fillerView.backgroundColor = .white
-        containerView.addSubview(fillerView)
-        fillerView.anchor(top: containerView.topAnchor, leading: containerView.leadingAnchor, bottom: nil, trailing: containerView.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 0), size: .init(width: containerView.frame.width, height: height))
-        
-        let submitButton = UIButton(type: .system)
-        submitButton.setTitle("Submit", for: .normal)
-        submitButton.setTitleColor(.black, for: .normal)
-        submitButton.titleLabel?.font = .boldSystemFont(ofSize: 14)
-        submitButton.addTarget(self, action: #selector(handleSubmit), for: .touchUpInside)
-        containerView.addSubview(submitButton)
-        submitButton.anchor(top: containerView.topAnchor, leading: nil, bottom: containerView.bottomAnchor, trailing: containerView.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 12), size: .init(width: 50, height: 0))
-        
-    
-        containerView.addSubview(commentTextField)
-        commentTextField.anchor(top: containerView.topAnchor, leading: containerView.leadingAnchor, bottom: containerView.bottomAnchor, trailing: submitButton.leadingAnchor, padding: .init(top: 0, left: 8, bottom: 0, right: 0), size: .init(width: 0, height: 0))
-        
-        let separatorView = UIView()
-        separatorView.backgroundColor = .lightGray
-        containerView.addSubview(separatorView)
-        separatorView.anchor(top: containerView.topAnchor, leading: containerView.leadingAnchor, bottom: nil, trailing: containerView.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 0), size: .init(width: 0, height: 0.5))
+        containerView.delegate = self
         
         return containerView
     }()
     
-    let commentTextField: UITextField = {
-       let tf = UITextField()
-        tf.placeholder = "Enter comment"
+    func didSubmit(for comment: String) {
+        print("Handling submiting from comment view controller...")
         
-        return tf
-    }()
-    
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        // Listen to keyboard notification to scroll to bottom of collection view
-        NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardShow), name: UIResponder.keyboardDidShowNotification, object: nil)
-    }
-    
-    @objc func handleSubmit() {
         guard let postId = self.post?.id else { return }
         
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
-        guard let commentText = commentTextField.text else { return }
-        
         let date = Date().timeIntervalSince1970
         
-        Firestore.firestore().collection("comments").document(postId).collection("userComments").addDocument(data: ["text" : commentText, "userId" : uid, "creationDate" : date]) { (error) in
+        Firestore.firestore().collection("comments").document(postId).collection("userComments").addDocument(data: ["text" : comment, "userId" : uid, "creationDate" : date]) { (error) in
             if let err = error {
                 print("Failed to add comment: ", err)
                 return
@@ -205,14 +177,13 @@ class CommentsController: LBTAListController<CommentCell, Comment>, UICollection
             print("Add comment successfully")
             
             // Reset textfield
-            self.commentTextField.text = nil
-            
-            self.commentTextField.resignFirstResponder()
+            self.commentInputAccessoryView.clearTextViewAndReturn()
         }
     }
     
+    
     override var inputAccessoryView: UIView? {
-        return containerView
+        return commentInputAccessoryView
     }
     
     override var canBecomeFirstResponder: Bool {
@@ -221,17 +192,7 @@ class CommentsController: LBTAListController<CommentCell, Comment>, UICollection
     
 }
 
-class ContainerView: UIView {
-//    override var intrinsicContentSize: CGSize {
-//        return CGSize.zero
-//    }
-    
-    override func didMoveToWindow() {
-        super.didMoveToWindow()
-        if #available(iOS 11.0, *) {
-            if let window = self.window {
-                self.bottomAnchor.constraint(lessThanOrEqualToSystemSpacingBelow: window.safeAreaLayoutGuide.bottomAnchor, multiplier: 1.0).isActive = true
-            }
-        }
-    }
-}
+
+
+
+

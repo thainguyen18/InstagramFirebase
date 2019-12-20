@@ -40,10 +40,19 @@ exports.observeFollowing = functions.firestore
                             const message = {
                                 notification: {
                                     title: "You now have a new follower",
-                                    body: "Person " + user.username + " is following you",
-                                    sound: "default"
+                                    body: "Person " + user.username + " is following you"
                                 },
-                
+                                data: {
+                                    followerId: uid
+                                },
+                                apns: {
+                                    payload: {
+                                        aps: {
+                                            sound: "default"
+                                        }
+                                    }
+                                },
+
                                 token: userFollowing.fcmToken
                             };
                         

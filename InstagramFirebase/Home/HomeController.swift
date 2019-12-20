@@ -35,10 +35,6 @@ class HomePostCell: LBTAListCell<Post> {
             
             setupAttributedCaption()
             
-            // Setup delegate to be parent viewcontroller
-            guard let homeController = parentController as? HomeController else { return }
-            delegate = homeController
-            
             likeButton.setImage(item.hasLiked ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
         }
     }
@@ -183,8 +179,13 @@ class HomePostCell: LBTAListCell<Post> {
 }
 
 class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDelegateFlowLayout, HomePostCellDelegate {
+    
+    let cellId = "CellId"
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateFeed), name: SharePhotoController.updateFeedNotificationName, object: nil)
         
@@ -221,15 +222,23 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     fileprivate func fetchFollowingUserIds() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
-        Firestore.firestore().collection("following").document(uid).getDocument { (snapshot, error) in
+        Firestore.firestore().collection("following").document(uid).collection("follows").getDocuments { (snapshot, error) in
             if let err = error {
                 print("Failed to fetch following users ", err)
                 return
             }
             
-            guard let followingUsersDict = snapshot?.data() else { return }
+//            guard let followingUsersDict = snapshot?.data() else { return }
+//
+//            followingUsersDict.forEach { (userId, _) in
+//                Firestore.fetchUserWithUID(uid: userId) { (user) in
+//                    self.fetchPostsWithUser(user: user)
+//                }
+//            }
             
-            followingUsersDict.forEach { (userId, _) in
+            snapshot?.documents.forEach { document in
+                let userId = document.documentID
+                
                 Firestore.fetchUserWithUID(uid: userId) { (user) in
                     self.fetchPostsWithUser(user: user)
                 }
@@ -305,6 +314,14 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                 }
             }
         }
+    }
+    
+    override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! HomePostCell
+        cell.item = self.items[indexPath.item]
+        cell.delegate = self
+        
+        return cell
     }
     
     
