@@ -47,7 +47,7 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         let plusNav = templateNav(selectedImage: #imageLiteral(resourceName: "plus_unselected") , unselectedImage: #imageLiteral(resourceName: "plus_unselected"))
         
         // Like
-        let likeNav = templateNav(selectedImage: #imageLiteral(resourceName: "like_selected"), unselectedImage: #imageLiteral(resourceName: "like_unselected"))
+        let likeNav = templateNav(selectedImage: #imageLiteral(resourceName: "like_selected"), unselectedImage: #imageLiteral(resourceName: "like_unselected"), rootViewController: LikeController())
         
         // user profile
         let profileNav = templateNav(selectedImage: #imageLiteral(resourceName: "profile_selected"), unselectedImage: #imageLiteral(resourceName: "profile_unselected"), rootViewController: UserProfileController())

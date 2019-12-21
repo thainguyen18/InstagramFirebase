@@ -132,7 +132,7 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
             return
         }
         
-        let refDB = Firestore.firestore().collection("posts").document(uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 6)
+        let refDB = Firestore.firestore().collection("posts").whereField("userId", isEqualTo: uid).order(by: "creationDate", descending: true).limit(to: 6)
         
         if let lastSnapshot = self.lastSnapshot {
             
@@ -230,7 +230,7 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
         
         guard let uid = self.user?.uid else { return }
         
-        let ref = Firestore.firestore().collection("posts").document(uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 1)
+        let ref = Firestore.firestore().collection("posts").whereField("userId", isEqualTo: uid).order(by: "creationDate", descending: true).limit(to: 1)
         
         self.listener = ref.addSnapshotListener { (querySnapshot, error) in
             if let err = error {

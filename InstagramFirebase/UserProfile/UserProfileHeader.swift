@@ -45,7 +45,7 @@ class UserProfileHeader: UICollectionReusableView {
         
         guard let userId = user?.uid else { return }
         
-        Firestore.firestore().collection("posts").document(userId).collection("userposts").getDocuments { (querySnapshot, error) in
+        Firestore.firestore().collection("posts").whereField("userId", isEqualTo: userId).getDocuments { (querySnapshot, error) in
             if let err = error {
                 print("Failed to fetch user posts: ", err)
                 return

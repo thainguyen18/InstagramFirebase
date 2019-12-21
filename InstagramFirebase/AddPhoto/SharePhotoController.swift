@@ -67,6 +67,17 @@ class SharePhotoController: UIViewController {
             return
         }
         
+        // Limit caption text to 160 characters follows Twitter style
+        guard textView.text.count <= 160 else {
+            
+            let alert = UIAlertController(title: "Caption too long", message: "Please limit your caption to 160 characters. Thank you!", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+            
+            present(alert, animated: true)
+            
+            return
+        }
+        
         let filename = UUID().uuidString
         
         let metadata = StorageMetadata()
@@ -110,9 +121,9 @@ class SharePhotoController: UIViewController {
         
         guard let caption = textView.text else { return }
         
-        let userPostRef = Firestore.firestore().collection("posts").document(uid).collection("userposts").document()
+        let userPostRef = Firestore.firestore().collection("posts").document()
         
-        let values: [String : Any] = ["imageUrl" : imageUrl, "caption" : caption, "imageWidth" : postImage.size.width, "imageHeight" : postImage.size.height, "creationDate" : Date().timeIntervalSince1970]
+        let values: [String : Any] = ["imageUrl" : imageUrl, "caption" : caption, "imageWidth" : postImage.size.width, "imageHeight" : postImage.size.height, "creationDate" : Date().timeIntervalSince1970, "userId": uid]
         
         userPostRef.setData(values) { (error) in
             if let err = error {

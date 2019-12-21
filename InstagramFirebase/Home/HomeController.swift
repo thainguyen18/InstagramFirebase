@@ -97,7 +97,7 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     
     fileprivate func fetchPostsWithUser(user: User) {
         
-        let ref = Firestore.firestore().collection("posts").document(user.uid).collection("userposts").order(by: "creationDate", descending: true).limit(to: 20)
+        let ref = Firestore.firestore().collection("posts").whereField("userId", isEqualTo: user.uid).order(by: "creationDate", descending: true).limit(to: 20)
         
         ref.getDocuments { (querySnapshot, error) in
             
