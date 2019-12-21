@@ -13,6 +13,7 @@ import Firebase
 protocol UserProfileHeaderDelegate {
     func didChangeToListView()
     func didChangeToGridView()
+    func didTapRibbonView()
 }
 
 class UserProfileHeader: UICollectionReusableView {
@@ -233,6 +234,7 @@ class UserProfileHeader: UICollectionReusableView {
     @objc func handleChangeToGridView() {
         listButton.tintColor = UIColor(white: 0, alpha: 0.2)
         gridButton.tintColor = .mainBlue()
+        ribbonButton.tintColor = UIColor(white: 0, alpha: 0.2)
         
         delegate?.didChangeToGridView()
     }
@@ -248,16 +250,26 @@ class UserProfileHeader: UICollectionReusableView {
     @objc func handleChangeToListView() {
         listButton.tintColor = UIColor.mainBlue()
         gridButton.tintColor = UIColor(white: 0, alpha: 0.2)
+        ribbonButton.tintColor = UIColor(white: 0, alpha: 0.2)
         
         delegate?.didChangeToListView()
     }
     
     let ribbonButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setImage(#imageLiteral(resourceName: "ribbon"), for: .normal)
+        button.setImage(#imageLiteral(resourceName: "ribbon_selected"), for: .normal)
         button.tintColor = UIColor(white: 0, alpha: 0.2)
+        button.addTarget(self, action: #selector(handleRibbonView), for: .touchUpInside)
         return button
     }()
+    
+    @objc func handleRibbonView() {
+        ribbonButton.tintColor = UIColor.mainBlue()
+        listButton.tintColor = UIColor(white: 0, alpha: 0.2)
+        gridButton.tintColor = UIColor(white: 0, alpha: 0.2)
+        
+        delegate?.didTapRibbonView()
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)

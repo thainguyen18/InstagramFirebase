@@ -33,7 +33,19 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         
         collectionView.refreshControl = refreshControl
         
-        fetchAllPosts()
+        //fetchAllPosts()
+        
+        if let uid = Auth.auth().currentUser?.uid {
+            Firestore.fetchPostsWithUID(uid: uid) { (posts) in
+                self.items = posts
+            }
+        }
+    }
+    
+    var currentUser = Auth.auth().currentUser {
+        didSet {
+            print(currentUser?.uid ?? "...")
+        }
     }
     
     @objc func handleUpdateFeed() {
@@ -211,6 +223,52 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                 }
                 
                 print("Successfully liked")
+                
+                DispatchQueue.main.async {
+                    self.collectionView.reloadItems(at: [indexPath])
+                }
+            }
+        }
+    }
+    
+    func didTapRibbon(for cell: HomePostCell) {
+       guard let indexPath = collectionView.indexPath(for: cell) else { return }
+        
+        var post = self.items[indexPath.item]
+        
+        guard let postId = post.id else { return }
+        
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        //Toggle the like button
+        post.hasRibboned = !post.hasRibboned
+        
+        // Because of struct value, we need to set the value in array to this modified value
+        self.items[indexPath.item] = post
+        
+        let ref = Firestore.firestore().collection("ribbons").document(uid).collection("postsRibbon").document(postId)
+        
+        if cell.item.hasRibboned {
+            ref.delete() { (error) in
+                if let err = error {
+                    print("Failed to unribbon: ", err)
+                    return
+                }
+                
+                print("Successfully unribboned")
+                
+                DispatchQueue.main.async {
+                    self.collectionView.reloadItems(at: [indexPath])
+                }
+            }
+        } else {
+            ref.setData([:]) { (error) in
+                if let err = error {
+                    print("Failed to ribbon: ", err)
+                    return
+                }
+                
+                print("Successfully ribboned")
                 
                 DispatchQueue.main.async {
                     self.collectionView.reloadItems(at: [indexPath])

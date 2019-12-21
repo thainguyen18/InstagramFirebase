@@ -1,8 +1,8 @@
 //
-//  LikeController.swift
+//  RibbonController.swift
 //  InstagramFirebase
 //
-//  Created by Thai Nguyen on 12/20/19.
+//  Created by Thai Nguyen on 12/21/19.
 //  Copyright © 2019 Thai Nguyen. All rights reserved.
 //
 
@@ -10,7 +10,7 @@ import UIKit
 import LBTATools
 import Firebase
 
-class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDelegateFlowLayout, HomePostCellDelegate {
+class RibbonController: LBTAListController<HomePostCell, Post>, UICollectionViewDelegateFlowLayout, HomePostCellDelegate {
     
     let cellId = "cellId"
     
@@ -25,7 +25,7 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         refreshControll.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
         collectionView.refreshControl = refreshControll
         
-        fetchLikePosts()
+        fetchRibbonPosts()
     }
     
     @objc func handleRefresh() {
@@ -33,20 +33,20 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         // Remove old data
         self.items.removeAll()
         
-        fetchLikePosts()
+        fetchRibbonPosts()
     }
     
     
-    fileprivate func fetchLikePosts() {
+    fileprivate func fetchRibbonPosts() {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
         Firestore.fetchUserWithUID(uid: uid) { (user) in
             self.navigationItem.title = user.username
         }
         
-        Firestore.firestore().collection("likes").document(uid).collection("postsLike").getDocuments { (snapshot, error) in
+        Firestore.firestore().collection("ribbons").document(uid).collection("postsRibbon").getDocuments { (snapshot, error) in
             if let err = error {
-                print("Failed to fetch posts liked: ", err)
+                print("Failed to fetch posts ribboned: ", err)
                 return
             }
             
@@ -57,7 +57,7 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                 
                 Firestore.firestore().collection("posts").document(postId).getDocument { (snapshot, error) in
                     if let err = error {
-                        print("Failed to get post liked: ", err)
+                        print("Failed to get post ribboned: ", err)
                         return
                     }
                     
@@ -69,8 +69,8 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                         
                         post.id = postId
                         
-                        // User already liked this post!
-                        post.hasLiked = true
+                        // User already ribboned this post!
+                        post.hasRibboned = true
                         
                         self.items.append(post)
                         
@@ -169,4 +169,3 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         }
     }
 }
-

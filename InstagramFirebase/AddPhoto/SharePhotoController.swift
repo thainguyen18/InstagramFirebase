@@ -138,6 +138,22 @@ class SharePhotoController: UIViewController {
             
             // Posting notifications to update home feeds
             NotificationCenter.default.post(name: SharePhotoController.updateFeedNotificationName, object: nil)
+            
+            // Increment number of posts
+            self.incrementUserNumberOfPosts()
+        }
+    }
+    
+    fileprivate func incrementUserNumberOfPosts() {
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        Firestore.fetchUserWithUID(uid: uid) { (user) in
+            Firestore.firestore().collection("users").document(uid).updateData(["numberOfPosts": user.numberOfPosts + 1]) { (error) in
+                if let err = error {
+                    print("Failed to increase number of posts: ", err)
+                    return
+                }
+            }
         }
     }
     

@@ -13,6 +13,8 @@ protocol HomePostCellDelegate {
     func didTapComment(post: Post)
     
     func didLike(for cell: HomePostCell)
+    
+    func didTapRibbon(for cell: HomePostCell)
 }
 
 
@@ -34,6 +36,8 @@ class HomePostCell: LBTAListCell<Post> {
             setupAttributedCaption()
             
             likeButton.setImage(item.hasLiked ? #imageLiteral(resourceName: "like_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "like_unselected").withRenderingMode(.alwaysOriginal), for: .normal)
+            
+            ribbonButton.setImage(item.hasRibboned ? #imageLiteral(resourceName: "ribbon_selected").withRenderingMode(.alwaysOriginal) : #imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
         }
     }
     
@@ -96,6 +100,7 @@ class HomePostCell: LBTAListCell<Post> {
     }()
     
     @objc func handleLike() {
+        print("Handling like...")
         delegate?.didLike(for: self)
     }
     
@@ -111,24 +116,28 @@ class HomePostCell: LBTAListCell<Post> {
         delegate?.didTapComment(post: self.item)
     }
     
-    let sendButton: UIButton = {
+    lazy var sendButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), for: .normal)
         
         return button
     }()
     
-    let ribbonButton: UIButton = {
+    lazy var ribbonButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "ribbon").withRenderingMode(.alwaysOriginal), for: .normal)
+        button.addTarget(self, action: #selector(handleTapRibbon), for: .touchUpInside)
         
         return button
     }()
     
+    @objc func handleTapRibbon() {
+        print("Handling ribbon...")
+        delegate?.didTapRibbon(for: self)
+    }
+    
     let captionLabel: UILabel = {
         let label = UILabel()
-        
-        
         
         label.numberOfLines = 0
         

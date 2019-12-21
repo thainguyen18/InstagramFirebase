@@ -30,6 +30,7 @@
 		4B70B95023AD20BE00292149 /* CommentInputTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B70B94F23AD20BE00292149 /* CommentInputTextView.swift */; };
 		4B70B95223AD572A00292149 /* HomePostCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B70B95123AD572A00292149 /* HomePostCell.swift */; };
 		4B70B95623AD7F4B00292149 /* LikeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B70B95523AD7F4B00292149 /* LikeController.swift */; };
+		4BF17B0A23AE955900E2D5D5 /* RibbonController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BF17B0923AE955900E2D5D5 /* RibbonController.swift */; };
 		4BFF21CA23983C7800FAE15A /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFF21C923983C7800FAE15A /* AppDelegate.swift */; };
 		4BFF21CC23983C7800FAE15A /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFF21CB23983C7800FAE15A /* SceneDelegate.swift */; };
 		4BFF21CE23983C7800FAE15A /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BFF21CD23983C7800FAE15A /* ContentView.swift */; };
@@ -68,6 +69,7 @@
 		4B70B94F23AD20BE00292149 /* CommentInputTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentInputTextView.swift; sourceTree = "<group>"; };
 		4B70B95123AD572A00292149 /* HomePostCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePostCell.swift; sourceTree = "<group>"; };
 		4B70B95523AD7F4B00292149 /* LikeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeController.swift; sourceTree = "<group>"; };
+		4BF17B0923AE955900E2D5D5 /* RibbonController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RibbonController.swift; sourceTree = "<group>"; };
 		4BFF21C623983C7800FAE15A /* InstagramFirebase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InstagramFirebase.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BFF21C923983C7800FAE15A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4BFF21CB23983C7800FAE15A /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -179,6 +181,14 @@
 			path = Like;
 			sourceTree = "<group>";
 		};
+		4BF17B0823AE953700E2D5D5 /* Ribbon */ = {
+			isa = PBXGroup;
+			children = (
+				4BF17B0923AE955900E2D5D5 /* RibbonController.swift */,
+			);
+			path = Ribbon;
+			sourceTree = "<group>";
+		};
 		4BFF21BD23983C7800FAE15A = {
 			isa = PBXGroup;
 			children = (
@@ -209,6 +219,7 @@
 				4B54A76523A0186E001CAE53 /* Camera */,
 				4B33B6B4239CACFE009CB15B /* Home */,
 				4B4FF1D1239EA366008B123B /* Search */,
+				4BF17B0823AE953700E2D5D5 /* Ribbon */,
 				4B70B95423AD7E2500292149 /* Like */,
 				4B33B6AF239C4246009CB15B /* Model */,
 				4B33B6AA239B10A7009CB15B /* AddPhoto */,
@@ -373,6 +384,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B70B95023AD20BE00292149 /* CommentInputTextView.swift in Sources */,
+				4BF17B0A23AE955900E2D5D5 /* RibbonController.swift in Sources */,
 				4B54A76D23A1A1E0001CAE53 /* CustomAnimationDismisser.swift in Sources */,
 				4B099B9E23A2A2460066F5B3 /* Comment.swift in Sources */,
 				4B54A76F23A1B6F5001CAE53 /* CommentsController.swift in Sources */,

@@ -109,16 +109,30 @@ class SearchController: LBTAListController<UserSearchCell, User>, UICollectionVi
         collectionView.alwaysBounceVertical = true
         collectionView.keyboardDismissMode = .onDrag
         
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
+        
         fetchUsers()
     }
     
+    
+    @objc func handleRefresh() {
+        //Reset data
+        self.usersMasterList.removeAll()
+        self.items.removeAll()
+        
+        fetchUsers()
+    }
+    
+    
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         if searchText.isEmpty {
-            self.items = self.usersMasterList
+            self.items = []
             return
         }
         
-        self.items = self.items.filter { $0.username.lowercased().contains(searchText.lowercased()) }
+        self.items = self.usersMasterList.filter { $0.username.lowercased().contains(searchText.lowercased()) }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -130,11 +144,13 @@ class SearchController: LBTAListController<UserSearchCell, User>, UICollectionVi
     private var usersMasterList = [User]()
     
     fileprivate func fetchUsers() {
-        Firestore.firestore().collection("users").getDocuments { (snapshot, error) in
+        Firestore.firestore().collection("users").order(by: "username", descending: false).getDocuments { (snapshot, error) in
             if let err = error {
                 print("Failed to fetch users ", err)
                 return
             }
+            
+            self.collectionView.refreshControl?.endRefreshing()
             
             snapshot?.documents.forEach { document in
                 let user = User(uid: document.documentID, dictionary: document.data())
@@ -144,15 +160,16 @@ class SearchController: LBTAListController<UserSearchCell, User>, UICollectionVi
                     return
                 }
                 
-                self.items.append(user)
+                //self.items.append(user)
+                self.usersMasterList.append(user)
             }
             
-            self.items.sort { $0.username < $1.username }
-            self.usersMasterList = self.items
+            //self.items.sort { $0.username < $1.username }
+            //self.usersMasterList = self.items
             
-            DispatchQueue.main.async {
-                self.collectionView.reloadData()
-            }
+//            DispatchQueue.main.async {
+//                self.collectionView.reloadData()
+//            }
         }
     }
     

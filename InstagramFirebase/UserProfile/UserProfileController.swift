@@ -160,8 +160,6 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
                 
                 self.items.sort { $0.creationDate > $1.creationDate }
                 
-                print(self.items.map {$0.creationDate})
-                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     self.isLoading = false
 
@@ -189,8 +187,6 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
                 
                 self.items.sort { $0.creationDate > $1.creationDate }
                 
-                print(self.items.map {$0.creationDate})
-                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                     self.isLoading = false
 
@@ -202,20 +198,6 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
     
     
     private var isLoading = false
-    
-//    override func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-//        let cellBottom = cell.frame.origin.y
-//
-//        print(collectionView.frame.height, cellBottom)
-//
-//        // Checking if last cell does not fill current visible view then fetch more
-//        if indexPath.item == self.items.count - 1 && !isLoading && (collectionView.frame.height - cellBottom > 100){
-//            isLoading = true
-//            paginatePosts()
-//        }
-//
-//
-//    }
     
     override func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView.contentOffset.y > -60 && !isLoading {
@@ -298,6 +280,12 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
     
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
+        if isRibbonView {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: homePostCellId, for: indexPath) as! HomePostCell
+            cell.item = self.items[indexPath.item]
+            return cell
+        }
+        
         if isGridView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellId, for: indexPath) as! UserProfilePhotoCell
             cell.item = self.items[indexPath.item]
@@ -358,13 +346,98 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
     }
     
     func didChangeToGridView() {
+        if isRibbonView {
+            isRibbonView = false
+            isGridView = true
+            
+            reFetchPosts()
+            
+            return
+        }
+        
         isGridView = true
         collectionView.reloadData()
+        
     }
     
     func didChangeToListView() {
+        if isRibbonView {
+            isRibbonView = false
+            isGridView = false
+            
+            reFetchPosts()
+            
+            return
+        }
+        
         isGridView = false
         collectionView.reloadData()
+    }
+    
+    fileprivate func reFetchPosts() {
+        guard let uid = self.user?.uid else { return }
+        
+        Firestore.fetchPostsWithUID(uid: uid) { (posts) in
+            self.items = posts
+        }
+    }
+    
+    
+    var isRibbonView = false
+    
+    var ribbonedItems = [Post]()
+    
+    func didTapRibbonView() {
+        // If ribbonItems not empty, use it otherwise fetch
+        guard self.ribbonedItems.isEmpty else {
+            self.items = self.ribbonedItems
+            
+            isRibbonView = true
+            isGridView = false
+            
+            return
+        }
+        
+        
+        guard let uid = user?.uid else { return }
+        guard let user = self.user else { return }
+        
+        isRibbonView = true
+        isGridView = false
+        
+        // Remove all items
+        self.items.removeAll()
+        
+        Firestore.firestore().collection("ribbons").document(uid).collection("postsRibbon").getDocuments { (querySnapshot, error) in
+            if let err = error {
+                print("Faild to fetch posts ribboned: ", err)
+                return
+            }
+            
+            querySnapshot?.documents.forEach { document in
+                let postId = document.documentID
+                
+                Firestore.firestore().collection("posts").document(postId).getDocument { (snapshot, error) in
+                    if let err = error {
+                        print("Failed to fetch posts: ", err)
+                        return
+                    }
+                    
+                    guard let dictionary = snapshot?.data() else { return }
+                    
+                    var post = Post(user: user, dictionary: dictionary)
+                    post.hasRibboned = true // User ribboned already
+                    
+                    self.ribbonedItems.append(post)
+                    
+                    self.items.append(post)
+                }
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.collectionView.reloadData()
+            }
+        }
     }
 }
 

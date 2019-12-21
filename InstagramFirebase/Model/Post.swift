@@ -19,6 +19,7 @@ struct Post {
     var id: String?
     
     var hasLiked: Bool = false
+    var hasRibboned: Bool = false
     
     init(user: User, dictionary: [String: Any]) {
         self.imageUrl = dictionary["imageUrl"] as? String ?? ""
