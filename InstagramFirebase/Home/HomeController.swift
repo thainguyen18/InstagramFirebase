@@ -156,12 +156,12 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        
+
         var height: CGFloat = 40 + 8 * 2 // user profile image + gaps
         height += view.frame.width
         height += 50 // space for buttons
         height += 80 // caption
-        
+
         return .init(width: view.frame.width, height: height)
     }
     

@@ -12,15 +12,6 @@ import Firebase
 
 class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDelegateFlowLayout, HomePostCellDelegate {
     
-    func didTapComment(post: Post) {
-        
-    }
-    
-    func didLike(for cell: HomePostCell) {
-        
-    }
-    
-    
     let cellId = "cellId"
     
     override func viewDidLoad() {
@@ -76,6 +67,8 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                     Firestore.fetchUserWithUID(uid: userId) { (user) in
                         var post = Post(user: user, dictionary: dictionary)
                         
+                        post.id = postId
+                        
                         // User already liked this post!
                         post.hasLiked = true
                         
@@ -113,6 +106,62 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         height += 80 // caption
         
         return .init(width: view.frame.width, height: height)
+    }
+    
+    
+    func didTapComment(post: Post) {
+        
+        let commentsController = CommentsController()
+        commentsController.post = post
+        
+        navigationController?.pushViewController(commentsController, animated: true)
+    }
+    
+    
+    func didLike(for cell: HomePostCell) {
+        guard let indexPath = collectionView.indexPath(for: cell) else { return }
+        
+        var post = self.items[indexPath.item]
+        
+        guard let postId = post.id else { return }
+        
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        //Toggle the like button
+        post.hasLiked = !post.hasLiked
+        
+        // Because of struct value, we need to set the value in array to this modified value
+        self.items[indexPath.item] = post
+        
+        let ref = Firestore.firestore().collection("likes").document(uid).collection("postsLike").document(postId)
+        
+        if cell.item.hasLiked {
+            ref.delete() { (error) in
+                if let err = error {
+                    print("Failed to unlike: ", err)
+                    return
+                }
+                
+                print("Successfully unliked")
+                
+                DispatchQueue.main.async {
+                    self.collectionView.reloadItems(at: [indexPath])
+                }
+            }
+        } else {
+            ref.setData([:]) { (error) in
+                if let err = error {
+                    print("Failed to like: ", err)
+                    return
+                }
+                
+                print("Successfully liked")
+                
+                DispatchQueue.main.async {
+                    self.collectionView.reloadItems(at: [indexPath])
+                }
+            }
+        }
     }
 }
 
