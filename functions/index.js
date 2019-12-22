@@ -73,6 +73,67 @@ exports.observeFollowing = functions.firestore
 
 });
 
+exports.observeSendingPost = functions.firestore
+        .document("sending/{senderId}/sends/{receiverId}/sendPosts/{postId}")
+        .onCreate((snapshot, context) => {
+            const senderId = context.params.senderId
+            const receiverId = context.params.receiverId
+            const postId = context.params.postId
+
+            // Logging message to signal sending post
+            console.log(senderId + " sent to " + receiverId + " a post " + postId)
+
+            admin.firestore().collection("users").doc(senderId).get()
+            .then(senderDoc => {
+                if (!senderDoc.exists) {
+                    console.log("Cound't find sender...")
+                } else {
+                    const senderUsername = senderDoc.data().username
+
+                    admin.firestore().collection("users").doc(receiverId).get()
+                    .then(receiverDoc => {
+                        if (!receiverDoc.exists) {
+                            console.log("Couldn't find receiver...")
+                        } else {
+                            const receiverFCM = receiverDoc.data().fcmToken
+
+                            const message = {
+                                notification: {
+                                    title: "Received a post!",
+                                    body: senderUsername + " sent you a post with id: " + postId
+                                },
+
+                                data: {
+                                    postId: postId
+                                },
+
+                                apns: {
+                                    payload: {
+                                        aps: {
+                                            sound: "default"
+                                        }
+                                    }
+                                },
+
+                                token: receiverFCM
+                            }
+
+                            admin.messaging().send(message)
+                            .then(response => {
+                                console.log("Successfully sent message: ", response)
+                            })
+                            .catch(error => {
+                                console.log("Error sending message: ", error)
+                            })
+                        }
+                    })
+                }
+            })
+            .catch(err => {
+                console.log('Error getting document ', err);
+            });
+        })
+
 exports.sendPushNotifications = functions.https.onRequest((req, res) => {
     res.send("Attempting to send push notifications...");
     console.log("LOGGER----Trying to send push message using hardcorede data...");

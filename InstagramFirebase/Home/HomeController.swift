@@ -301,6 +301,23 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         
         present(actionSheet, animated: true)
     }
+    
+    
+    func didTapSend(for cell: HomePostCell) {
+        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+        
+        guard let indexPath = self.collectionView.indexPath(for: cell) else { return }
+        
+        let post = self.items[indexPath.item]
+        
+        let sendController = SendController()
+        
+        sendController.senderId = currentUserId
+        
+        sendController.post = post
+        
+        navigationController?.pushViewController(sendController, animated: true)
+    }
 }
 
 

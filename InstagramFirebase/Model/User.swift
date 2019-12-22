@@ -13,11 +13,13 @@ class User {
     let profileImageUrl: String
     let uid: String
     let numberOfPosts: Int
+    let fcmToken: String
     
     init(uid: String, dictionary: [String:Any]) {
         self.username = dictionary["username"] as? String ?? ""
         self.profileImageUrl = dictionary["profileImageUrl"] as? String ?? ""
         self.uid = uid
         self.numberOfPosts = dictionary["numberOfPosts"] as? Int ?? 0
+        self.fcmToken = dictionary["fcmToken"] as? String ?? ""
     }
 }

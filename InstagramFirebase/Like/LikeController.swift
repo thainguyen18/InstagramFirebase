@@ -228,5 +228,9 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
             }
         }
     }
+    
+    func didTapSend(for cell: HomePostCell) {
+        
+    }
 }
 

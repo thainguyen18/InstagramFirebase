@@ -451,6 +451,12 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
             }
         }
     }
+    
+    
+    func didTapSend(for cell: HomePostCell) {
+        
+    }
+    
 }
 
 

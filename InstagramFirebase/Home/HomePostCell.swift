@@ -17,6 +17,8 @@ protocol HomePostCellDelegate {
     func didTapRibbon(for cell: HomePostCell)
     
     func didTapOptions(for cell: HomePostCell)
+    
+    func didTapSend(for cell: HomePostCell)
 }
 
 
@@ -128,9 +130,14 @@ class HomePostCell: LBTAListCell<Post> {
     lazy var sendButton: UIButton = {
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "send2").withRenderingMode(.alwaysOriginal), for: .normal)
-        
+        button.addTarget(self, action: #selector(handleSend), for: .touchUpInside)
         return button
     }()
+    
+    @objc fileprivate func handleSend() {
+        print("Handle sending...")
+        delegate?.didTapSend(for: self)
+    }
     
     lazy var ribbonButton: UIButton = {
         let button = UIButton(type: .system)
