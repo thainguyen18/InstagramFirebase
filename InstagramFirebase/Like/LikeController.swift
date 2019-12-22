@@ -75,7 +75,7 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                         post.hasLiked = true
                         
                         // Check if user also ribboned this post
-                        Firestore.firestore().collection("ribbons").document(userId).collection("postsRibbon").document(postId).getDocument { (snapshot, error) in
+                        Firestore.firestore().collection("ribbons").document(uid).collection("postsRibbon").document(postId).getDocument { (snapshot, error) in
                             if let document = snapshot, document.exists {
                                 post.hasRibboned = true
                             }
@@ -113,6 +113,17 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         height += 80 // caption
         
         return .init(width: view.frame.width, height: height)
+    }
+    
+    func didTapOptions(for cell: HomePostCell) {
+        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(title: "Save Post", style: .default, handler: { (_) in
+            self.didTapRibbon(for: cell)
+        }))
+        
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        present(actionSheet, animated: true)
     }
     
     

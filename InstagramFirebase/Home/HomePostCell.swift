@@ -15,6 +15,8 @@ protocol HomePostCellDelegate {
     func didLike(for cell: HomePostCell)
     
     func didTapRibbon(for cell: HomePostCell)
+    
+    func didTapOptions(for cell: HomePostCell)
 }
 
 
@@ -82,14 +84,21 @@ class HomePostCell: LBTAListCell<Post> {
         return label
     }()
     
-    let optionsButton: UIButton = {
+    lazy var optionsButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("•••", for: .normal)
         button.titleLabel?.font = .boldSystemFont(ofSize: 24)
         button.setTitleColor(.black, for: .normal)
+        button.addTarget(self, action: #selector(handleOptions), for: .touchUpInside)
         
         return button
     }()
+    
+    @objc fileprivate func handleOptions() {
+        print("Handle options...")
+        
+        delegate?.didTapOptions(for: self)
+    }
     
     lazy var likeButton: UIButton = {
         let button = UIButton(type: .system)

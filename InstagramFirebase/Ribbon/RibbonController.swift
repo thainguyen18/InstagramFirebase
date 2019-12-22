@@ -158,6 +158,18 @@ class RibbonController: LBTAListController<HomePostCell, Post>, UICollectionView
     }
     
     
+    func didTapOptions(for cell: HomePostCell) {
+        let actionSheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(title: "Save Post", style: .default, handler: { (_) in
+            self.didTapRibbon(for: cell)
+        }))
+        
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        present(actionSheet, animated: true)
+    }
+    
+    
     func didTapComment(post: Post) {
         
         let commentsController = CommentsController()
