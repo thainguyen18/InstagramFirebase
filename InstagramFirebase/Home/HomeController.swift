@@ -33,13 +33,14 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         
         collectionView.refreshControl = refreshControl
         
-        //fetchAllPosts()
+        fetchAllPosts()
         
-        if let uid = Auth.auth().currentUser?.uid {
-            Firestore.fetchPostsWithUID(uid: uid) { (posts) in
-                self.items = posts
-            }
-        }
+//        guard let uid = Auth.auth().currentUser?.uid else { return }
+//
+//        Firestore.fetchPostsWithUID(uid: uid) { (posts) in
+//            self.items = posts
+//        }
+        
     }
     
     var currentUser = Auth.auth().currentUser {
@@ -127,33 +128,46 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                 
                 var post = Post(user: user, dictionary: document.data())
                 
-                post.id = document.documentID
+                let postId = document.documentID
+                
+                post.id = postId
                 
                 // Check if current user liked this post
                 guard let uid = Auth.auth().currentUser?.uid else { return }
                 
-                Firestore.firestore().collection("likes").document(uid).collection("postsLike").getDocuments { (snapshot, error) in
+                Firestore.firestore().collection("likes").document(uid).collection("postsLike").document(postId).getDocument { (snapshot, error) in
                     if let err = error {
                         print("Failed to fetch likes ", err)
                         return
                     }
                     
-                    snapshot?.documents.forEach { document in
-                        if document.documentID == post.id {
-                            post.hasLiked = true
+                    
+                    if let document = snapshot, document.exists {
+                        post.hasLiked = true
+                    }
+                    
+                    // Check if user ribboned this post
+                    Firestore.firestore().collection("ribbons").document(uid).collection("postsRibbon").document(postId).getDocument { (snapshot, error) in
+                        if let err = error {
+                            print("Failed to fetch ribbons ", err)
                             return
                         }
-                    }
-                    
-                    self.items.append(post)
-                    
-                    self.items.sort { $0.creationDate > $1.creationDate }
-                    
-                    DispatchQueue.main.async {
                         
-                        self.collectionView.reloadData()
+                        if let document = snapshot, document.exists {
+                            post.hasRibboned = true
+                        }
+                        
+                        self.items.append(post)
+                        
+                        self.items.sort { $0.creationDate > $1.creationDate }
                     }
                 }
+                
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                
+                self.collectionView.reloadData()
             }
         }
     }
@@ -232,7 +246,7 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     }
     
     func didTapRibbon(for cell: HomePostCell) {
-       guard let indexPath = collectionView.indexPath(for: cell) else { return }
+        guard let indexPath = collectionView.indexPath(for: cell) else { return }
         
         var post = self.items[indexPath.item]
         

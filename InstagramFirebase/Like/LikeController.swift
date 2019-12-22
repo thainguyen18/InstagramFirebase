@@ -26,6 +26,7 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         collectionView.refreshControl = refreshControll
         
         fetchLikePosts()
+        
     }
     
     @objc func handleRefresh() {
@@ -34,6 +35,7 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         self.items.removeAll()
         
         fetchLikePosts()
+
     }
     
     
@@ -72,16 +74,21 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
                         // User already liked this post!
                         post.hasLiked = true
                         
-                        self.items.append(post)
-                        
-                        self.items.sort { $0.creationDate > $1.creationDate }
+                        // Check if user also ribboned this post
+                        Firestore.firestore().collection("ribbons").document(userId).collection("postsRibbon").document(postId).getDocument { (snapshot, error) in
+                            if let document = snapshot, document.exists {
+                                post.hasRibboned = true
+                            }
+                            
+                            self.items.append(post)
+                            
+                            self.items.sort { $0.creationDate > $1.creationDate }
+                        }
                     }
                 }
             }
             
-            //self.items.sort { $0.creationDate > $1.creationDate }
-            
-            DispatchQueue.main.async {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                 
                 self.collectionView.reloadData()
             }
@@ -110,7 +117,49 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     
     
     func didTapRibbon(for cell: HomePostCell) {
+        guard let indexPath = collectionView.indexPath(for: cell) else { return }
         
+        var post = self.items[indexPath.item]
+        
+        guard let postId = post.id else { return }
+        
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        //Toggle the like button
+        post.hasRibboned = !post.hasRibboned
+        
+        // Because of struct value, we need to set the value in array to this modified value
+        self.items[indexPath.item] = post
+        
+        let ref = Firestore.firestore().collection("ribbons").document(uid).collection("postsRibbon").document(postId)
+        
+        if cell.item.hasRibboned {
+            ref.delete() { (error) in
+                if let err = error {
+                    print("Failed to unribbon: ", err)
+                    return
+                }
+                
+                print("Successfully unribboned")
+                
+                DispatchQueue.main.async {
+                    self.collectionView.reloadItems(at: [indexPath])
+                }
+            }
+        } else {
+            ref.setData([:]) { (error) in
+                if let err = error {
+                    print("Failed to ribbon: ", err)
+                    return
+                }
+                
+                print("Successfully ribboned")
+                
+                DispatchQueue.main.async {
+                    self.collectionView.reloadItems(at: [indexPath])
+                }
+            }
+        }
     }
     
     

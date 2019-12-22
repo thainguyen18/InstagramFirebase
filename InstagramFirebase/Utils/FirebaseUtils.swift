@@ -25,9 +25,11 @@ extension Firestore {
         }
     }
     
-    static func fetchPostsWithUID(uid: String, completion: @escaping (([Post]) -> ())) {
+    static func fetchPostsWithUID(uid: String, onlyLikes: Bool = false, onlyRibbons: Bool = false, completion: @escaping (([Post]) -> ())) {
         
-        var posts = [Post]()
+        var allPosts = [Post]()
+        var likePosts = [Post]()
+        var ribbonPosts = [Post]()
         
         Firestore.firestore().collection("posts").whereField("userId", isEqualTo: uid).order(by: "creationDate", descending: true).getDocuments { (querySnapshot, error) in
             if let err = error {
@@ -46,6 +48,10 @@ extension Firestore {
                     Firestore.firestore().collection("likes").document(uid).collection("postsLike").document(postId).getDocument { (snapshot, error) in
                         if let document = snapshot, document.exists {
                             post.hasLiked = true
+                            
+                            if onlyLikes {
+                                likePosts.append(post)
+                            }
                         }
                         
                         // Check if user ribboned it
@@ -54,13 +60,31 @@ extension Firestore {
                                 post.hasRibboned = true
                             }
                             
-                            posts.append(post)
+                            if onlyRibbons {
+                                ribbonPosts.append(post)
+                            }
+                            
+                            allPosts.append(post)
                         }
                     }
                 }
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    completion(posts)
+                    
+                    if onlyLikes {
+                        likePosts.sort { $0.creationDate > $1.creationDate }
+                        completion(likePosts)
+                        return
+                    }
+                    
+                    if onlyRibbons {
+                        ribbonPosts.sort { $0.creationDate > $1.creationDate }
+                        completion(ribbonPosts)
+                        return
+                    }
+                    
+                    allPosts.sort { $0.creationDate > $1.creationDate }
+                    completion(allPosts)
                 }
             }
         }

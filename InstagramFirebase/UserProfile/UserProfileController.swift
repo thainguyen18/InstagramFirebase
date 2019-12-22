@@ -68,6 +68,12 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
     }
     
     @objc func handleRefresh() {
+        
+        if isRibbonView {
+            didTapRibbonView()
+            return
+        }
+        
         paginatePosts()
     }
     
@@ -132,7 +138,7 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
             return
         }
         
-        let refDB = Firestore.firestore().collection("posts").whereField("userId", isEqualTo: uid).order(by: "creationDate", descending: true).limit(to: 6)
+        let refDB = Firestore.firestore().collection("posts").whereField("userId", isEqualTo: uid).order(by: "creationDate", descending: true).limit(to: 9)
         
         if let lastSnapshot = self.lastSnapshot {
             
@@ -147,7 +153,7 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
                 
                 self.lastSnapshot = snapshot?.documents.last
                 
-                if let snapshot = snapshot, snapshot.documents.count < 6 {
+                if let snapshot = snapshot, snapshot.documents.count < 9 {
                 
                     self.isFinished = true
                 }
@@ -199,12 +205,12 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
     
     private var isLoading = false
     
-    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if scrollView.contentOffset.y > -60 && !isLoading {
-            isLoading = true
-            paginatePosts()
-        }
-    }
+//    override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//        if scrollView.contentOffset.y > -60 && !isLoading {
+//            isLoading = true
+//            paginatePosts()
+//        }
+//    }
     
     
     // Using this fetch to get the most recent post
@@ -385,22 +391,10 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
     
     var isRibbonView = false
     
-    var ribbonedItems = [Post]()
     
     func didTapRibbonView() {
-        // If ribbonItems not empty, use it otherwise fetch
-        guard self.ribbonedItems.isEmpty else {
-            self.items = self.ribbonedItems
-            
-            isRibbonView = true
-            isGridView = false
-            
-            return
-        }
-        
         
         guard let uid = user?.uid else { return }
-        guard let user = self.user else { return }
         
         isRibbonView = true
         isGridView = false
@@ -414,6 +408,8 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
                 return
             }
             
+            self.collectionView.refreshControl?.endRefreshing()
+            
             querySnapshot?.documents.forEach { document in
                 let postId = document.documentID
                 
@@ -423,18 +419,34 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
                         return
                     }
                     
-                    guard let dictionary = snapshot?.data() else { return }
+                    guard let dictionary = snapshot?.data(), let userId = dictionary["userId"] as? String else { return }
                     
-                    var post = Post(user: user, dictionary: dictionary)
-                    post.hasRibboned = true // User ribboned already
-                    
-                    self.ribbonedItems.append(post)
-                    
-                    self.items.append(post)
+                    Firestore.fetchUserWithUID(uid: userId) { (user) in
+                        var post = Post(user: user, dictionary: dictionary)
+                        post.id = postId
+                        post.hasRibboned = true // User ribboned already
+                        
+                        // Check if user also liked this post
+                        Firestore.firestore().collection("likes").document(uid).collection("postsLike").document(postId).getDocument { (snapshot, error) in
+                            if let err = error {
+                                print("Failed to fetch likes: ", err)
+                                return
+                            }
+                            
+                            if let document = snapshot, document.exists {
+                                post.hasLiked = true
+                            }
+                            
+                            self.items.append(post)
+                            
+                            self.items.sort { $0.creationDate > $1.creationDate }
+                        }
+                    }
                 }
             }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                
                 self.collectionView.reloadData()
             }
         }

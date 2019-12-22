@@ -153,23 +153,17 @@ class SearchController: LBTAListController<UserSearchCell, User>, UICollectionVi
             self.collectionView.refreshControl?.endRefreshing()
             
             snapshot?.documents.forEach { document in
-                let user = User(uid: document.documentID, dictionary: document.data())
+                let userId = document.documentID
                 
                 // Remove ourselves the current user
-                if Auth.auth().currentUser?.uid == user.uid {
-                    return
+                if Auth.auth().currentUser?.uid != userId {
+                    let user = User(uid: document.documentID, dictionary: document.data())
+                    
+                    
+                    //self.items.append(user)
+                    self.usersMasterList.append(user)
                 }
-                
-                //self.items.append(user)
-                self.usersMasterList.append(user)
             }
-            
-            //self.items.sort { $0.username < $1.username }
-            //self.usersMasterList = self.items
-            
-//            DispatchQueue.main.async {
-//                self.collectionView.reloadData()
-//            }
         }
     }
     
