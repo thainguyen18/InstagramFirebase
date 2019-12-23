@@ -14,6 +14,7 @@ protocol UserProfileHeaderDelegate {
     func didChangeToListView()
     func didChangeToGridView()
     func didTapRibbonView()
+    func didTapEditButton()
 }
 
 class UserProfileHeader: UICollectionReusableView {
@@ -121,7 +122,12 @@ class UserProfileHeader: UICollectionReusableView {
     
     @objc func handleEditProfileOrFollow() {
         // If current user profile then return
-        if editButton.titleLabel?.text == "Edit Profile" { return }
+        if editButton.titleLabel?.text == "Edit Profile" {
+            
+            delegate?.didTapEditButton()
+            
+            return
+        }
         
         guard let currentUserId = Auth.auth().currentUser?.uid  else { return }
         guard let uid = user?.uid else { return }
@@ -211,7 +217,7 @@ class UserProfileHeader: UICollectionReusableView {
 
     let followingLabel = UILabel(text: "0", font: .boldSystemFont(ofSize: 14), textColor: .black, textAlignment: .center, numberOfLines: 1)
 
-    let editButton: UIButton = {
+    lazy var editButton: UIButton = {
         let button = UIButton(type: .system)
         button.titleLabel?.font = .boldSystemFont(ofSize: 14)
         button.layer.cornerRadius = 8
@@ -270,6 +276,8 @@ class UserProfileHeader: UICollectionReusableView {
         
         delegate?.didTapRibbonView()
     }
+    
+    
     
     override init(frame: CGRect) {
         super.init(frame: frame)
