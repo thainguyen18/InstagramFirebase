@@ -65,6 +65,21 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdatePosts), name: SharePhotoController.updateFeedNotificationName, object: nil)
         
         NotificationCenter.default.addObserver(self, selector: #selector(handleUpdateHeader), name: UserProfileHeader.updateHeaderData, object: nil)
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(updateUserProfileImage), name: SignUpController.profileUpdateNotificationName, object: nil)
+    }
+    
+    @objc fileprivate func updateUserProfileImage() {
+        
+        guard let currentUserId = Auth.auth().currentUser?.uid else { return }
+        
+        // If user not updating his profile then return
+        if self.user?.uid == currentUserId {
+            Firestore.fetchUserWithUID(uid: currentUserId) { (user) in
+                self.user = user
+                self.collectionView.reloadData()
+            }
+        }
     }
     
     @objc func handleRefresh() {
@@ -455,6 +470,49 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
     
     func didTapSend(for cell: HomePostCell) {
         
+    }
+    
+    
+    
+    func didTapEditButton() {
+        
+        reAuthenticateUser()
+        
+    }
+ 
+    
+    fileprivate func reAuthenticateUser() {
+        let alert = UIAlertController(title: nil, message: "Please enter your password before proceeding", preferredStyle: .alert)
+        
+        alert.addTextField { (textField) in
+            textField.isSecureTextEntry = true
+            textField.placeholder = "Password"
+        }
+        
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: { _ in
+            guard let textField = alert.textFields?.first, let password = textField.text else { return }
+            
+            guard let currentUser = Auth.auth().currentUser, let email = currentUser.email else { return }
+            
+            let credential = EmailAuthProvider.credential(withEmail: email, password: password)
+            
+            currentUser.reauthenticate(with: credential) { (_, error) in
+                if let err = error {
+                    print("Error ReAuthenticating... ", err)
+                    return
+                }
+                
+                let editProfileController = SignUpController()
+                editProfileController.user = self.user
+                editProfileController.password = password
+                
+                self.present(editProfileController, animated: true)
+            }
+        }))
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        self.present(alert, animated: true)
     }
     
 }

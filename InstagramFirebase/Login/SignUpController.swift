@@ -17,6 +17,7 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         let button = UIButton(type: .system)
         button.setImage(#imageLiteral(resourceName: "plus_photo").withRenderingMode(.alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(handlePlusPhoto), for: .touchUpInside)
+        
         return button
     }()
     
@@ -39,6 +40,12 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         plusPhotoButton.layer.masksToBounds = true
         plusPhotoButton.layer.borderColor = UIColor.black.cgColor
         plusPhotoButton.layer.borderWidth = 3
+        
+        // If updating user profile
+        if let _ = self.user {
+             signupButton.isEnabled = true
+             signupButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+        }
         
         dismiss(animated: true)
     }
@@ -115,11 +122,89 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         _ = navigationController?.popViewController(animated: true)
     }
     
+    fileprivate func updateEmail(with email: String) {
+        Auth.auth().currentUser?.updateEmail(to: email, completion: nil)
+    }
+    
+    fileprivate func updatePassword(with password: String) {
+        Auth.auth().currentUser?.updatePassword(to: password, completion: nil)
+    }
+    
+    fileprivate func updateProfileImageUrl() {
+        // Upload user profile image
+        guard let image = self.plusPhotoButton.imageView?.image else { return }
+        
+        guard let imageData = image.jpegData(compressionQuality: 0.3) else { return }
+        
+        let fileName = UUID().uuidString
+        
+        let metaData = StorageMetadata()
+        metaData.contentType = "image/jpeg"
+        
+        Storage.storage().reference().child("profile_images").child(fileName).putData(imageData, metadata: metaData) { (metaData, error) in
+            if let err = error {
+                print("Failed to upload profile image: ", err)
+                return
+            }
+            
+            guard let path = metaData?.path else { return }
+            
+            Storage.storage().reference(withPath: path).downloadURL(completion: { (url, error) in
+                if let err = error {
+                    print("Some error: ", err)
+                    return
+                }
+                
+                guard let profileImageUrl = url else { return }
+                
+                print("Successfully uploaded profile image", profileImageUrl.absoluteString)
+                
+                // User database
+                guard let uid = Auth.auth().currentUser?.uid else { return }
+                
+                Firestore.firestore().collection("users").document(uid).updateData(
+                    ["profileImageUrl": profileImageUrl.absoluteString],
+                    completion: { (err) in
+                        if let err = err {
+                            print("Failed to update user info into db: ", err)
+                            return
+                        }
+                        
+                        print("Successfully updated user info into db")
+                        
+                        NotificationCenter.default.post(name: SignUpController.profileUpdateNotificationName, object: nil)
+                        
+                        self.dismiss(animated: true)
+//
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+//                            guard let mainTabController = self.presentingViewController as? MainTabBarController else { return }
+//                            guard let upvc = mainTabController.viewControllers?.last as? UserProfileController else { return }
+//
+//                            upvc.collectionView.reloadData()
+//                        }
+                })
+            })
+        }
+    }
+    
+    static let profileUpdateNotificationName = Notification.Name("profileUpdate")
+    
     
     @objc func handleSignUp() {
         guard let email = emailTextField.text, email.count > 0 else { return }
         guard let username = usernameTextField.text, username.count > 0 else { return }
         guard let password = passwordTextField.text, password.count > 0 else { return }
+        
+        // Handle updating profile if in such case
+        if self.signupButton.titleLabel?.text == "Update" {
+            print("Handle updating...")
+            
+            updateEmail(with: email)
+            updatePassword(with: password)
+            updateProfileImageUrl()
+            
+            return
+        }
         
         Auth.auth().createUser(withEmail: email, password: password) { (result: AuthDataResult?, error: Error?) in
             if let err = error {
@@ -175,9 +260,9 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
                         }
                         
                         print("Successfully saved user info into db")
-                            let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
+                        let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
                             
-                            guard let mainTabBarController = window?.rootViewController as? MainTabBarController else { return }
+                        guard let mainTabBarController = window?.rootViewController as? MainTabBarController else { return }
                             
                         mainTabBarController.setupViewControllers()
                             
@@ -188,6 +273,12 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
             
         }
     }
+    
+    
+    // Using this property when user edits their profile
+    var user: User?
+    var password: String?
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -205,6 +296,51 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         view.addSubview(alreadyHaveAnAccountButton)
         
         alreadyHaveAnAccountButton.anchor(top: nil, leading: view.leadingAnchor, bottom: view.safeAreaLayoutGuide.bottomAnchor, trailing: view.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 0), size: .init(width: 0, height: 40))
+        
+        // If updating user profile
+        if let _ = self.user {
+            setupUpdateMode()
+        }
+    }
+    
+    fileprivate func setupUpdateMode() {
+        
+        guard let userAuth = Auth.auth().currentUser else { return }
+        
+        self.alreadyHaveAnAccountButton.isHidden = true
+        
+        self.signupButton.setTitle("Update", for: .normal)
+        
+        self.usernameTextField.isEnabled = false
+        
+        self.emailTextField.text = userAuth.email
+        
+        self.passwordTextField.text = password
+        
+        guard let userDatabase = self.user else { return }
+        
+        self.usernameTextField.text = userDatabase.username
+        
+        guard let url = URL(string: userDatabase.profileImageUrl) else { return }
+        
+        URLSession.shared.dataTask(with: url) { (data, response, error) in
+            if let err = error {
+                print("Failed to fetch user image: ", err)
+                return
+            }
+            
+            guard let data = data else { return }
+            
+            let photoImage = UIImage(data: data)
+            
+            DispatchQueue.main.async {
+                self.plusPhotoButton.setImage(photoImage?.withRenderingMode(.alwaysOriginal), for: .normal)
+                self.plusPhotoButton.layer.cornerRadius = self.plusPhotoButton.frame.width / 2
+                self.plusPhotoButton.layer.masksToBounds = true
+                self.plusPhotoButton.layer.borderColor = UIColor.black.cgColor
+                self.plusPhotoButton.layer.borderWidth = 3
+            }
+        }.resume()
     }
     
     
