@@ -314,21 +314,4 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
 }
 
 
-struct HomePreview: PreviewProvider {
-    static var previews: some View {
-        NavigationView {
-            HomeView()
-                .navigationBarTitle("Home", displayMode: .inline)
-        }
-    }
-    
-    struct HomeView: UIViewControllerRepresentable {
-        func updateUIViewController(_ uiViewController: HomePreview.HomeView.UIViewControllerType, context: UIViewControllerRepresentableContext<HomePreview.HomeView>) {
-            
-        }
-        
-        func makeUIViewController(context: UIViewControllerRepresentableContext<HomePreview.HomeView>) -> HomeController {
-            return HomeController()
-        }
-    }
-}
+

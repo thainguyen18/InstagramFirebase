@@ -81,8 +81,14 @@ class LoginController: UIViewController {
         Auth.auth().signIn(withEmail: email, password: password) { (authDataResult, error) in
             if let err = error {
                 print("Failed to log in: ", err)
+                
+                let alert = UIAlertController(title: "Failed to log in", message: "Please check your email/password.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+                
                 return
             }
+            
             
             print("Successfully logged back in with user: ", authDataResult?.user.uid ?? "")
             
@@ -144,19 +150,3 @@ class LoginController: UIViewController {
     }
 }
 
-struct LoginControllerPreview: PreviewProvider {
-    static var previews: some View {
-        LoginView().edgesIgnoringSafeArea(.all)
-    }
-    
-    
-    struct LoginView: UIViewControllerRepresentable {
-        func updateUIViewController(_ uiViewController: LoginControllerPreview.LoginView.UIViewControllerType, context: UIViewControllerRepresentableContext<LoginControllerPreview.LoginView>) {
-            
-        }
-        
-        func makeUIViewController(context: UIViewControllerRepresentableContext<LoginControllerPreview.LoginView>) -> LoginController {
-            return LoginController()
-        }
-    }
-}

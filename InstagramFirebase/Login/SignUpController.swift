@@ -364,19 +364,4 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
     }
 }
 
-struct SignUpPreview: PreviewProvider {
-    static var previews: some View {
-        SignUpView()
-    }
-    
-    
-    struct SignUpView: UIViewControllerRepresentable {
-        func updateUIViewController(_ uiViewController: SignUpPreview.SignUpView.UIViewControllerType, context: UIViewControllerRepresentableContext<SignUpPreview.SignUpView>) {
-            
-        }
-        
-        func makeUIViewController(context: UIViewControllerRepresentableContext<SignUpPreview.SignUpView>) -> SignUpController {
-            return SignUpController()
-        }
-    }
-}
+

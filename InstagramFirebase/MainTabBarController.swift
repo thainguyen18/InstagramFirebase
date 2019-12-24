@@ -91,18 +91,4 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
     }
 }
 
-struct MainTabBarControllerPreview: PreviewProvider {
-    static var previews: some View {
-        MainTabBarViewContainer().edgesIgnoringSafeArea(.all)
-    }
-    
-    struct MainTabBarViewContainer: UIViewControllerRepresentable {
-        func updateUIViewController(_ uiViewController: MainTabBarControllerPreview.MainTabBarViewContainer.UIViewControllerType, context: UIViewControllerRepresentableContext<MainTabBarControllerPreview.MainTabBarViewContainer>) {
-            
-        }
-        
-        func makeUIViewController(context: UIViewControllerRepresentableContext<MainTabBarControllerPreview.MainTabBarViewContainer>) -> MainTabBarController {
-            return MainTabBarController()
-        }
-    }
-}
+
