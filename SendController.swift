@@ -98,7 +98,8 @@ class SendController: LBTAListController<UserSearchCell, User>, UICollectionView
                     savedLabel.textColor = .white
                     savedLabel.backgroundColor = UIColor(white: 0, alpha: 0.3)
                     savedLabel.numberOfLines = 0
-                    savedLabel.layer.cornerRadius = 40
+                    savedLabel.layer.cornerRadius = 10
+                    savedLabel.clipsToBounds = true
                     savedLabel.font = .boldSystemFont(ofSize: 16)
                     savedLabel.textAlignment = .center
                     
@@ -129,49 +130,6 @@ class SendController: LBTAListController<UserSearchCell, User>, UICollectionView
                 }
             }
         }
-        
-//        ref.setData([:]) { (error) in
-//            if let err = error {
-//                print("Failed to send post: ", err)
-//                return
-//            }
-//
-//            DispatchQueue.main.async {
-//                let savedLabel = UILabel()
-//                savedLabel.text = "Sent successfully"
-//                savedLabel.textColor = .white
-//                savedLabel.backgroundColor = UIColor(white: 0, alpha: 0.3)
-//                savedLabel.numberOfLines = 0
-//                savedLabel.layer.cornerRadius = 40
-//                savedLabel.font = .boldSystemFont(ofSize: 16)
-//                savedLabel.textAlignment = .center
-//
-//                self.collectionView.addSubview(savedLabel)
-//
-//                savedLabel.centerInSuperview()
-//                savedLabel.withSize(.init(width: 150, height: 80))
-//
-//
-//                savedLabel.layer.transform = CATransform3DMakeScale(0, 0, 0)
-//
-//                UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5, options: .curveEaseOut, animations: {
-//                    savedLabel.layer.transform = CATransform3DMakeScale(1, 1, 1)
-//                }) { (completed) in
-//                    // completed
-//
-//                    UIView.animate(withDuration: 0.5, delay: 0.75, usingSpringWithDamping: 0.5, initialSpringVelocity: 0.5, options: .curveEaseOut, animations: {
-//
-//                        savedLabel.layer.transform = CATransform3DMakeScale(0.01, 0.01, 0.01)
-//                        savedLabel.alpha = 0
-//
-//                    }) { (_) in
-//
-//                        savedLabel.removeFromSuperview()
-//                        self.navigationController?.popViewController(animated: true)
-//                    }
-//                }
-//            }
-//        }
     }
 }
 

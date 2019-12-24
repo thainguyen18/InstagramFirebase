@@ -20,14 +20,6 @@ class CommentInputAccessoryView: UIView {
     
     var delegate: CommentInputAccessoryViewDelegate?
     
-//    override func didMoveToWindow() {
-//        super.didMoveToWindow()
-//        if #available(iOS 11.0, *) {
-//            if let window = self.window {
-//                self.bottomAnchor.constraint(lessThanOrEqualToSystemSpacingBelow: window.safeAreaLayoutGuide.bottomAnchor, multiplier: 1.0).isActive = true
-//            }
-//        }
-//    }
     
     fileprivate let submitButton: UIButton = {
         
@@ -42,7 +34,7 @@ class CommentInputAccessoryView: UIView {
     
     let commentTextView: CommentInputTextView = {
        let tv = CommentInputTextView()
-        //tv.placeholder = "Enter comment"
+        
         tv.font = .systemFont(ofSize: 18)
         
         tv.isScrollEnabled = false
@@ -55,8 +47,6 @@ class CommentInputAccessoryView: UIView {
         
         autoresizingMask = .flexibleHeight
         
-        //setupFillerView()
-        
         setupSubmitButton()
         
         setupTextView()
@@ -64,14 +54,6 @@ class CommentInputAccessoryView: UIView {
         setupSeparatorView()
     }
     
-//    fileprivate func setupFillerView() {
-//        let height = frame.height + 34 //34 is bottom safe area layout for iphone X
-//
-//        let fillerView = UIView()
-//            fillerView.backgroundColor = .white
-//            addSubview(fillerView)
-//        fillerView.anchor(top: topAnchor, leading: leadingAnchor, bottom: nil, trailing: trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 0), size: .init(width: frame.width, height: height))
-//    }
     
     fileprivate func setupSubmitButton() {
         addSubview(submitButton)

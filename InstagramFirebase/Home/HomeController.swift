@@ -12,7 +12,6 @@ import LBTATools
 import Firebase
 
 
-
 class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDelegateFlowLayout, HomePostCellDelegate {
     
     let cellId = "CellId"
@@ -34,12 +33,6 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         collectionView.refreshControl = refreshControl
         
         fetchAllPosts()
-        
-//        guard let uid = Auth.auth().currentUser?.uid else { return }
-//
-//        Firestore.fetchPostsWithUID(uid: uid) { (posts) in
-//            self.items = posts
-//        }
         
     }
     

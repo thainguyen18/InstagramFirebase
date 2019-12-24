@@ -33,10 +33,6 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewC
     @objc func handleCapturePhoto() {
         let settings = AVCapturePhotoSettings()
         
-        //guard let previewFormatType = settings.availablePreviewPhotoPixelFormatTypes.first else { return }
-        
-        //settings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String : previewFormatType]
-        
         output.capturePhoto(with: settings, delegate: self)
     }
     
@@ -44,8 +40,6 @@ class CameraController: UIViewController, AVCapturePhotoCaptureDelegate, UIViewC
         guard let imageData = photo.fileDataRepresentation() else { return }
         
         let previewImage = UIImage(data: imageData)
-        
-        //let previewImageView = UIImageView(image: previewImage)
         
         let previewPhotoContainerView = PreviewPhotoContainerView()
         
