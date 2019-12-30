@@ -546,6 +546,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = InstagramFirebase/InstagramFirebase.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"InstagramFirebase/Preview Content\"";
 				DEVELOPMENT_TEAM = DQMC8A8D24;
 				ENABLE_PREVIEWS = YES;
@@ -569,6 +570,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = InstagramFirebase/InstagramFirebase.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_ASSET_PATHS = "\"InstagramFirebase/Preview Content\"";
 				DEVELOPMENT_TEAM = DQMC8A8D24;
 				ENABLE_PREVIEWS = YES;
