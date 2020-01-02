@@ -104,7 +104,7 @@ class LoginController: UIViewController {
        let view = UIView()
         view.backgroundColor = UIColor.rgb(red: 0, green: 120, blue: 175)
         
-        let logo = UIImageView(image: #imageLiteral(resourceName: "Instagram_logo_white"), contentMode: .scaleAspectFill)
+        let logo = UIImageView(image: #imageLiteral(resourceName: "Instaminimalist_white").withRenderingMode(.alwaysOriginal), contentMode: .scaleAspectFill)
         
         view.addSubview(logo)
         

@@ -26,6 +26,8 @@
 		4B54A76B23A0B936001CAE53 /* CustomAnimationPresentor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B54A76A23A0B936001CAE53 /* CustomAnimationPresentor.swift */; };
 		4B54A76D23A1A1E0001CAE53 /* CustomAnimationDismisser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B54A76C23A1A1E0001CAE53 /* CustomAnimationDismisser.swift */; };
 		4B54A76F23A1B6F5001CAE53 /* CommentsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B54A76E23A1B6F5001CAE53 /* CommentsController.swift */; };
+		4B56FA4F23BE864E0027C7F2 /* MapViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B56FA4E23BE864E0027C7F2 /* MapViewController.swift */; };
+		4B56FA5123BE8F9E0027C7F2 /* LocationFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B56FA5023BE8F9E0027C7F2 /* LocationFetcher.swift */; };
 		4B70B94E23ACA15E00292149 /* CommentInputAccessoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B70B94D23ACA15E00292149 /* CommentInputAccessoryView.swift */; };
 		4B70B95023AD20BE00292149 /* CommentInputTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B70B94F23AD20BE00292149 /* CommentInputTextView.swift */; };
 		4B70B95223AD572A00292149 /* HomePostCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B70B95123AD572A00292149 /* HomePostCell.swift */; };
@@ -64,6 +66,8 @@
 		4B54A76A23A0B936001CAE53 /* CustomAnimationPresentor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomAnimationPresentor.swift; sourceTree = "<group>"; };
 		4B54A76C23A1A1E0001CAE53 /* CustomAnimationDismisser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomAnimationDismisser.swift; sourceTree = "<group>"; };
 		4B54A76E23A1B6F5001CAE53 /* CommentsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentsController.swift; sourceTree = "<group>"; };
+		4B56FA4E23BE864E0027C7F2 /* MapViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapViewController.swift; sourceTree = "<group>"; };
+		4B56FA5023BE8F9E0027C7F2 /* LocationFetcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationFetcher.swift; sourceTree = "<group>"; };
 		4B70B94D23ACA15E00292149 /* CommentInputAccessoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentInputAccessoryView.swift; sourceTree = "<group>"; };
 		4B70B94F23AD20BE00292149 /* CommentInputTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentInputTextView.swift; sourceTree = "<group>"; };
 		4B70B95123AD572A00292149 /* HomePostCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePostCell.swift; sourceTree = "<group>"; };
@@ -171,6 +175,14 @@
 			path = Camera;
 			sourceTree = "<group>";
 		};
+		4B56FA4D23BE86190027C7F2 /* Map */ = {
+			isa = PBXGroup;
+			children = (
+				4B56FA4E23BE864E0027C7F2 /* MapViewController.swift */,
+			);
+			path = Map;
+			sourceTree = "<group>";
+		};
 		4B70B95423AD7E2500292149 /* Like */ = {
 			isa = PBXGroup;
 			children = (
@@ -214,7 +226,9 @@
 				4BFF21C923983C7800FAE15A /* AppDelegate.swift */,
 				4BFF21CB23983C7800FAE15A /* SceneDelegate.swift */,
 				4B091D082398D76800C8EF15 /* MainTabBarController.swift */,
+				4B56FA5023BE8F9E0027C7F2 /* LocationFetcher.swift */,
 				4B54A76523A0186E001CAE53 /* Camera */,
+				4B56FA4D23BE86190027C7F2 /* Map */,
 				4B33B6B4239CACFE009CB15B /* Home */,
 				4BF17B0B23B016DD00E2D5D5 /* Send */,
 				4B4FF1D1239EA366008B123B /* Search */,
@@ -401,6 +415,7 @@
 				4BF17B0D23B016F000E2D5D5 /* SendController.swift in Sources */,
 				4B091D11239A25AC00C8EF15 /* LoginController.swift in Sources */,
 				4BFF21CC23983C7800FAE15A /* SceneDelegate.swift in Sources */,
+				4B56FA5123BE8F9E0027C7F2 /* LocationFetcher.swift in Sources */,
 				4B70B95623AD7F4B00292149 /* LikeController.swift in Sources */,
 				4B33B6AE239BEC9E009CB15B /* SharePhotoController.swift in Sources */,
 				4B54A76923A03BBF001CAE53 /* PreviewPhotoContainerView.swift in Sources */,
@@ -408,6 +423,7 @@
 				4B70B95223AD572A00292149 /* HomePostCell.swift in Sources */,
 				4B33B6A9239B0790009CB15B /* SearchController.swift in Sources */,
 				4BFF21DE23983CD600FAE15A /* SignUpController.swift in Sources */,
+				4B56FA4F23BE864E0027C7F2 /* MapViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

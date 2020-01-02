@@ -80,9 +80,21 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     }
     
     func setupNavigationItems() {
-        navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "logo2"))
+        navigationItem.titleView = UIImageView(image: #imageLiteral(resourceName: "logo_black").withRenderingMode(.alwaysOriginal))
         
          navigationItem.leftBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "camera3").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleCamera))
+        
+        navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "icons8-map-marker-50").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleMapView))
+    }
+    
+    
+    @objc func handleMapView() {
+        print("Enter mapview...")
+        
+        let mapView = MapViewController()
+        mapView.modalPresentationStyle = .fullScreen
+        
+        self.present(mapView, animated: true)
     }
     
     @objc func handleCamera() {

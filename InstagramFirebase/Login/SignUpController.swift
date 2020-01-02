@@ -209,6 +209,11 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         Auth.auth().createUser(withEmail: email, password: password) { (result: AuthDataResult?, error: Error?) in
             if let err = error {
                 print("Failed to create user", err)
+                
+                let alert = UIAlertController(title: "Error! Failed to sign up", message: "Please try again later.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default))
+                self.present(alert, animated: true)
+                
                 return
             }
             

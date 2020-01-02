@@ -24,6 +24,8 @@
 	<string>We need to access to camera to take photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>We need access to your photo library to make profile image</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need to access your location to attach it to your post</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

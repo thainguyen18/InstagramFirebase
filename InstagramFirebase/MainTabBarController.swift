@@ -11,12 +11,17 @@ import SwiftUI
 import Firebase
 
 class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
+    
+    let locationFetcher = LocationFetcher()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.delegate = self
         
         setupViewControllers()
+        
+        locationFetcher.start()
     }
     
     func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
