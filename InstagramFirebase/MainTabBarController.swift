@@ -31,8 +31,10 @@ class MainTabBarController: UITabBarController, UITabBarControllerDelegate {
         if index == 2 {
             
             let photoSelectorController = PhotoSelectorController()
+            
             let nav = UINavigationController(rootViewController: photoSelectorController)
             nav.modalPresentationStyle = .fullScreen
+            
             present(nav, animated: true)
             
             return false

@@ -17,7 +17,7 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        collectionView.backgroundColor = .white
+        //collectionView.backgroundColor = .white
         
         collectionView.register(HomePostCell.self, forCellWithReuseIdentifier: cellId)
         
@@ -123,7 +123,12 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         height += 50 // space for buttons
         height += 80 // caption
         
-        return .init(width: view.frame.width, height: height)
+        return .init(width: view.frame.width - 4 * 2, height: height)
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return .init(top: 4, left: 0, bottom: 0, right: 0)
     }
     
     func didTapOptions(for cell: HomePostCell) {

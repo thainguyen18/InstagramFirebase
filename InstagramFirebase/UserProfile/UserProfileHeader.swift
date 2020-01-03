@@ -192,19 +192,19 @@ class UserProfileHeader: UICollectionReusableView {
         if following {
             // Update UI Following
             self.editButton.setTitle("Unfollow", for: .normal)
-            self.editButton.backgroundColor = .clear
-            self.editButton.setTitleColor(.black, for: .normal)
+            self.editButton.backgroundColor = .systemRed
+            self.editButton.setTitleColor(.white, for: .normal)
         } else {
             // Not following UI
             self.editButton.setTitle("Follow", for: .normal)
-            self.editButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+            self.editButton.backgroundColor = .mainBlue()
             self.editButton.setTitleColor(.white, for: .normal)
         }
     }
     
     let imageView: CustomImageView = {
         let iv = CustomImageView()
-        iv.backgroundColor = .green
+        iv.backgroundColor = .white
         
         return iv
     }()
@@ -223,6 +223,9 @@ class UserProfileHeader: UICollectionReusableView {
         button.layer.cornerRadius = 8
         button.layer.borderColor = UIColor(white: 0, alpha: 0.2).cgColor
         button.layer.borderWidth = 2
+        
+        button.backgroundColor = UIColor.rgb(red: 246, green: 114, blue: 65)
+        button.setTitleColor(.white, for: .normal)
         
         button.addTarget(self, action: #selector(handleEditProfileOrFollow), for: .touchUpInside)
 
@@ -282,6 +285,8 @@ class UserProfileHeader: UICollectionReusableView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         
+        //self.setGradientBackground()
+        
         imageView.layer.cornerRadius = 80 / 2
         imageView.clipsToBounds = true
         
@@ -296,9 +301,9 @@ class UserProfileHeader: UICollectionReusableView {
                 stack(imageView.withSize(.init(width: 80, height: 80)), nameLabel, UIView(), spacing: 20),
                 stack(
                     hstack(
-                        stack(postsLabel, UILabel(text: "posts", textColor: .lightGray, textAlignment: .center)),
-                        stack(followersLabel, UILabel(text: "followers", textColor: .lightGray, textAlignment: .center)),
-                        stack(followingLabel, UILabel(text: "following", textColor: .lightGray, textAlignment:  .center)),
+                        stack(postsLabel, UILabel(text: "posts", textColor: .white, textAlignment: .center)),
+                        stack(followersLabel, UILabel(text: "followers", textColor: .white, textAlignment: .center)),
+                        stack(followingLabel, UILabel(text: "following", textColor: .white, textAlignment:  .center)),
                         distribution: .fillEqually
                         ),
                     editButton.withHeight(30),

@@ -163,7 +163,9 @@ class HomePostCell: LBTAListCell<Post> {
     override func setupViews() {
         super.setupViews()
         
-        backgroundColor = .white
+        backgroundColor = UIColor(white: 1.0, alpha: 0.5)
+        
+        self.layer.cornerRadius = 15
         
         userProfileImageView.layer.cornerRadius = 40 / 2
         

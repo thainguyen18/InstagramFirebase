@@ -70,15 +70,15 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
     }
     
     
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//        
-//        let view = UIView(frame: collectionView.bounds)
-//        view.setGradientBackground()
-//        
-//        collectionView.backgroundView = view
-//        
-//    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        let view = UIView(frame: collectionView.bounds)
+        view.setGradientBackground()
+        
+        self.view.insertSubview(view, belowSubview: collectionView)
+        collectionView.backgroundColor = .clear
+    }
     
     @objc fileprivate func updateUserProfileImage() {
         
@@ -345,12 +345,24 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
             height += 50 // space for buttons
             height += 80 // caption
             
-            return .init(width: view.frame.width, height: height)
+            return .init(width: view.frame.width - 4 * 2, height: height)
         }
     }
     
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        return .init(top: 4, left: 0, bottom: 0, right: 0)
+    }
+    
+    
+    
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumLineSpacingForSectionAt section: Int) -> CGFloat {
-        return 1
+        
+        if isGridView {
+            return 1
+        } else {
+            return 12
+        }
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {

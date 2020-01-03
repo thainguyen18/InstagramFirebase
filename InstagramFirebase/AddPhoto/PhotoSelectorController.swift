@@ -68,8 +68,6 @@ class PhotoSelectorController: LBTAListHeaderController<ImageCell, UIImage, Phot
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        collectionView.backgroundColor = .white
-        
         setupNavButtons()
         
         fetchPhotos()
@@ -77,16 +75,16 @@ class PhotoSelectorController: LBTAListHeaderController<ImageCell, UIImage, Phot
     }
     
     
-//    
-//    override func viewWillAppear(_ animated: Bool) {
-//        super.viewWillAppear(animated)
-//        
-//        let view = UIView(frame: collectionView.bounds)
-//        view.setGradientBackground()
-//        
-//        collectionView.backgroundView = view
-//        
-//    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        let view = UIView(frame: collectionView.bounds)
+        view.setGradientBackground()
+        
+        self.view.insertSubview(view, belowSubview: collectionView)
+        collectionView.backgroundColor = .clear
+    }
+    
     
     // Keep a ref to the header to access selected high res Image
     var photoSelectorHeader: PhotoSelectorHeader?
@@ -205,6 +203,8 @@ class PhotoSelectorController: LBTAListHeaderController<ImageCell, UIImage, Phot
         
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(handleCancel))
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Next", style: .plain, target: self, action: #selector(handleNext))
+        
+        title = "Select a photo"
     }
     
     @objc func handleCancel() {

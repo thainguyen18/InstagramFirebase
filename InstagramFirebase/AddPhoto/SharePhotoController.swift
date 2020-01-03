@@ -18,6 +18,8 @@ class SharePhotoController: UIViewController {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Share", style: .plain, target: self, action: #selector(handleShare))
         
         setupImageAndTextViews()
+        
+        title = "Create Post"
     }
     
     
@@ -44,7 +46,7 @@ class SharePhotoController: UIViewController {
     
     let textView: UITextView = {
        let tv = UITextView()
-        tv.backgroundColor = .white
+        tv.backgroundColor = UIColor(white: 1.0, alpha: 0.5)
         tv.text = "Some caption text for our photo..."
         tv.font = .systemFont(ofSize: 14)
         tv.textColor = .black
@@ -56,10 +58,12 @@ class SharePhotoController: UIViewController {
     
     fileprivate func setupImageAndTextViews() {
         let containerView = UIView()
-        containerView.backgroundColor = .white
+        containerView.backgroundColor = UIColor(white: 1.0, alpha: 0.7)
+        
+        containerView.layer.cornerRadius = 15
         
         view.addSubview(containerView)
-        containerView.anchor(top: view.safeAreaLayoutGuide.topAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 0, left: 0, bottom: 0, right: 0), size: .init(width: 0, height: 100))
+        containerView.anchor(top: view.safeAreaLayoutGuide.topAnchor, leading: view.leadingAnchor, bottom: nil, trailing: view.trailingAnchor, padding: .init(top: 12, left: 8, bottom: 0, right: 8), size: .init(width: 0, height: 100))
         
         containerView.addSubview(imageView)
         imageView.anchor(top: containerView.topAnchor, leading: containerView.leadingAnchor, bottom: containerView.bottomAnchor, trailing: nil, padding: .init(top: 8, left: 8, bottom: 8, right: 0), size: .init(width: 100 - 8 * 2, height: 0))
@@ -129,7 +133,10 @@ class SharePhotoController: UIViewController {
                 
                 // Generate image thumnail and save to Firebase storage-----------------------
                 let thumbnailName = UUID().uuidString
-                let size = CGSize(width: selectedImage.size.width * 0.2, height: selectedImage.size.height * 0.2)
+                let ratio = selectedImage.size.width / selectedImage.size.height
+                let desiredHeight: CGFloat = 100
+                let size = CGSize(width: desiredHeight * ratio, height: desiredHeight)
+                
                 let renderer = UIGraphicsImageRenderer(size: size)
                 let thumbnailImage = renderer.image { context in
                     selectedImage.draw(in: CGRect(origin: .zero, size: size))
@@ -223,5 +230,12 @@ class SharePhotoController: UIViewController {
     
     override var prefersStatusBarHidden: Bool {
         return true
+    }
+    
+    // Dismiss keyboard upon touching outside textview
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        super.touchesBegan(touches, with: event)
+        
+        view.endEditing(true)
     }
 }

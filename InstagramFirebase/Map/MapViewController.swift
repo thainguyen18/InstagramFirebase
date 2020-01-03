@@ -41,9 +41,13 @@ class CustomAnnotationView: MKPinAnnotationView {
             guard let width = customAnnotation.thumbnailImage?.size.width else { return }
             guard let height = customAnnotation.thumbnailImage?.size.height else { return }
             
-            let imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: width * 0.5, height: height * 0.5))
+            let ratio = width / height
+            let desiredHeight: CGFloat = 100
+            
+            let imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: desiredHeight * ratio, height: desiredHeight))
             imageView.image = customAnnotation.thumbnailImage
-            imageView.contentMode = .scaleAspectFit
+            imageView.contentMode = .scaleToFill
+            imageView.clipsToBounds = true
             
             detailCalloutAccessoryView = imageView
             
@@ -63,9 +67,13 @@ class CustomAnnotationView: MKPinAnnotationView {
         guard let width = customAnnotation.thumbnailImage?.size.width else { return }
         guard let height = customAnnotation.thumbnailImage?.size.height else { return }
         
-        let imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: width * 0.5, height: height * 0.5))
+        let ratio = width / height
+        let desiredHeight: CGFloat = 100
+        
+        let imageView = UIImageView(frame: CGRect(x: 0, y: 0, width: desiredHeight * ratio, height: desiredHeight))
         imageView.image = customAnnotation.thumbnailImage
-        imageView.contentMode = .scaleAspectFit
+        imageView.contentMode = .scaleToFill
+        imageView.clipsToBounds = true
         
         detailCalloutAccessoryView = imageView
     }

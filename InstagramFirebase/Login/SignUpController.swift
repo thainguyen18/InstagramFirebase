@@ -52,7 +52,7 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
     
     let emailTextField: UITextField = {
         let tf = UITextField(placeholder: "Email")
-        tf.backgroundColor = UIColor.init(white: 0, alpha: 0.03)
+        tf.backgroundColor = UIColor.init(white: 1.0, alpha: 0.7)
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
         tf.textColor = .black
@@ -68,16 +68,18 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         
         if isFormValid {
             signupButton.isEnabled = true
-            signupButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+            signupButton.backgroundColor = UIColor.rgb(red: 246, green: 114, blue: 65)
+            signupButton.alpha = 1.0
         } else {
             signupButton.isEnabled = false
-            signupButton.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
+            signupButton.backgroundColor = UIColor.rgb(red: 244, green: 129, blue: 70)
+            signupButton.alpha = 0.7
         }
     }
     
     let usernameTextField: UITextField = {
         let tf = UITextField(placeholder: "Username")
-        tf.backgroundColor = UIColor.init(white: 0, alpha: 0.03)
+        tf.backgroundColor = UIColor.init(white: 1.0, alpha: 0.7)
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
         tf.textColor = .black
@@ -87,7 +89,7 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
     
     let passwordTextField: UITextField = {
         let tf = UITextField(placeholder: "Password")
-        tf.backgroundColor = UIColor.init(white: 0, alpha: 0.03)
+        tf.backgroundColor = UIColor.init(white: 1.0, alpha: 0.7)
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
         tf.isSecureTextEntry = true
@@ -97,7 +99,8 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
     }()
     
     let signupButton: UIButton = {
-        let button = UIButton(title: "Sign Up", titleColor: .white, font: .boldSystemFont(ofSize: 14), backgroundColor: UIColor.rgb(red: 149, green: 204, blue: 244))
+        let button = UIButton(title: "Sign Up", titleColor: .white, font: .boldSystemFont(ofSize: 14), backgroundColor: UIColor.rgb(red: 244, green: 129, blue: 70))
+        button.alpha = 0.7
         button.addTarget(self, action: #selector(handleSignUp), for: .touchUpInside)
         button.layer.cornerRadius = 5
         
@@ -109,9 +112,9 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
     let alreadyHaveAnAccountButton: UIButton = {
         let button = UIButton(type: .system)
         
-        let attributedTitle = NSMutableAttributedString(string: "Already have an account?  ", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.lightGray])
+        let attributedTitle = NSMutableAttributedString(string: "Already have an account?  ", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.black])
         
-        attributedTitle.append(NSAttributedString(string: "Sign In", attributes: [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.mainBlue()]))
+        attributedTitle.append(NSAttributedString(string: "Sign In", attributes: [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.white]))
         
         button.setAttributedTitle(attributedTitle, for: .normal)
         button.addTarget(self, action: #selector(handleAlreadyHaveAnAccount), for: .touchUpInside)
@@ -288,7 +291,9 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .white
+        //view.backgroundColor = .white
+        
+        view.setGradientBackground()
         
         view.addSubview(plusPhotoButton)
         
@@ -325,6 +330,10 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         guard let userDatabase = self.user else { return }
         
         self.usernameTextField.text = userDatabase.username
+        
+        
+        // Enable update button
+        self.handleTextInput()
         
         guard let url = URL(string: userDatabase.profileImageUrl) else { return }
         

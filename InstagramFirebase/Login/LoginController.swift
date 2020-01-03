@@ -15,9 +15,9 @@ class LoginController: UIViewController {
     let dontHaveAnAccountButton: UIButton = {
         let button = UIButton(type: .system)
         
-        let attributedTitle = NSMutableAttributedString(string: "Don't have an account?  ", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.lightGray])
+        let attributedTitle = NSMutableAttributedString(string: "Don't have an account?  ", attributes: [NSAttributedString.Key.font : UIFont.systemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.black])
         
-        attributedTitle.append(NSAttributedString(string: "Sign Up", attributes: [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.rgb(red: 17, green: 154, blue: 237)]))
+        attributedTitle.append(NSAttributedString(string: "Sign Up", attributes: [NSAttributedString.Key.font : UIFont.boldSystemFont(ofSize: 14), NSAttributedString.Key.foregroundColor : UIColor.white]))
         
         button.setAttributedTitle(attributedTitle, for: .normal)
         button.addTarget(self, action: #selector(handleShowSignUp), for: .touchUpInside)
@@ -32,7 +32,7 @@ class LoginController: UIViewController {
     
     let emailTextField: UITextField = {
         let tf = UITextField(placeholder: "Email")
-        tf.backgroundColor = UIColor.init(white: 0, alpha: 0.03)
+        tf.backgroundColor = UIColor.init(white: 1.0, alpha: 0.7)
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
         tf.textColor = .black
@@ -42,7 +42,7 @@ class LoginController: UIViewController {
     
     let passwordTextField: UITextField = {
         let tf = UITextField(placeholder: "Password")
-        tf.backgroundColor = UIColor.init(white: 0, alpha: 0.03)
+        tf.backgroundColor = UIColor.init(white: 1.0, alpha: 0.7)
         tf.borderStyle = .roundedRect
         tf.font = .systemFont(ofSize: 14)
         tf.textColor = .black
@@ -57,15 +57,18 @@ class LoginController: UIViewController {
            
            if isFormValid {
                loginButton.isEnabled = true
-               loginButton.backgroundColor = UIColor.rgb(red: 17, green: 154, blue: 237)
+               loginButton.backgroundColor = UIColor.rgb(red: 246, green: 114, blue: 65)
+               loginButton.alpha = 1.0
            } else {
                loginButton.isEnabled = false
-               loginButton.backgroundColor = UIColor.rgb(red: 149, green: 204, blue: 244)
+               loginButton.backgroundColor = UIColor.rgb(red: 244, green: 129, blue: 70)
+               loginButton.alpha = 0.7
            }
        }
     
     let loginButton: UIButton = {
-        let button = UIButton(title: "Log In", titleColor: .white, font: .boldSystemFont(ofSize: 14), backgroundColor: UIColor.rgb(red: 149, green: 204, blue: 244))
+        let button = UIButton(title: "Log In", titleColor: .white, font: .boldSystemFont(ofSize: 14), backgroundColor: UIColor.rgb(red: 244, green: 129, blue: 70))
+        button.alpha = 0.7
         button.addTarget(self, action: #selector(handleLogin), for: .touchUpInside)
         button.layer.cornerRadius = 5
         
@@ -102,7 +105,7 @@ class LoginController: UIViewController {
     
     let logoContainer: UIView = {
        let view = UIView()
-        view.backgroundColor = UIColor.rgb(red: 0, green: 120, blue: 175)
+        view.backgroundColor = .clear //UIColor.rgb(red: 0, green: 120, blue: 175)
         
         let logo = UIImageView(image: #imageLiteral(resourceName: "Instaminimalist_white").withRenderingMode(.alwaysOriginal), contentMode: .scaleAspectFill)
         
@@ -116,7 +119,9 @@ class LoginController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .white
+        //view.backgroundColor = .white
+        
+        view.setGradientBackground()
         
         navigationController?.isNavigationBarHidden = true
         
