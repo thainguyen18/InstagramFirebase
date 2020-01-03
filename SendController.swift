@@ -29,6 +29,17 @@ class SendController: LBTAListController<UserSearchCell, User>, UICollectionView
         fetchFollowingUsers()
     }
     
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        let view = UIView(frame: collectionView.bounds)
+        view.setGradientBackground()
+        
+        collectionView.backgroundView = view
+        
+    }
+    
     fileprivate func fetchFollowingUsers() {
         guard let currentUserId = Auth.auth().currentUser?.uid else { return }
         

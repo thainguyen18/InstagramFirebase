@@ -29,6 +29,7 @@ class CommentCell: LBTAListCell<Comment> {
         let tv = UITextView()
         tv.isScrollEnabled = false
         tv.isEditable = false
+        tv.backgroundColor = .clear
         
         return tv
     }()
@@ -44,6 +45,8 @@ class CommentCell: LBTAListCell<Comment> {
     
     override func setupViews() {
         super.setupViews()
+        
+        backgroundColor = .clear
         
         profileImageView.layer.cornerRadius = 40 / 2
         
@@ -130,6 +133,13 @@ class CommentsController: LBTAListController<CommentCell, Comment>, UICollection
         super.viewWillAppear(animated)
         
         tabBarController?.tabBar.isHidden = true
+        
+        
+        // Gradient background
+        let view = UIView(frame: collectionView.bounds)
+        view.setGradientBackground()
+        
+        collectionView.backgroundView = view
     }
     
     

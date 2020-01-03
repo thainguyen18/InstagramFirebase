@@ -58,6 +58,8 @@ class UserSearchCell: LBTAListCell<User> {
     override func setupViews() {
         super.setupViews()
         
+        backgroundColor = .clear
+        
         // Size for circular profile image view
         let width = frame.height - 2 * 8
         
@@ -139,6 +141,12 @@ class SearchController: LBTAListController<UserSearchCell, User>, UICollectionVi
         super.viewWillAppear(animated)
         
         searchBar.isHidden = false
+        
+        // Gradient background
+        let view = UIView(frame: collectionView.bounds)
+        view.setGradientBackground()
+        
+        collectionView.backgroundView = view
     }
     
     private var usersMasterList = [User]()

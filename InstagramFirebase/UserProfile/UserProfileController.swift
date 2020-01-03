@@ -69,6 +69,17 @@ class UserProfileController: LBTAListHeaderController<UserProfilePhotoCell, Post
         NotificationCenter.default.addObserver(self, selector: #selector(updateUserProfileImage), name: SignUpController.profileUpdateNotificationName, object: nil)
     }
     
+    
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//        
+//        let view = UIView(frame: collectionView.bounds)
+//        view.setGradientBackground()
+//        
+//        collectionView.backgroundView = view
+//        
+//    }
+    
     @objc fileprivate func updateUserProfileImage() {
         
         guard let currentUserId = Auth.auth().currentUser?.uid else { return }

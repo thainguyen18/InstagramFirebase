@@ -72,6 +72,7 @@
 		4B70B94F23AD20BE00292149 /* CommentInputTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentInputTextView.swift; sourceTree = "<group>"; };
 		4B70B95123AD572A00292149 /* HomePostCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomePostCell.swift; sourceTree = "<group>"; };
 		4B70B95523AD7F4B00292149 /* LikeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LikeController.swift; sourceTree = "<group>"; };
+		4BD69AD623BF01660024F264 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		4BF17B0C23B016F000E2D5D5 /* SendController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SendController.swift; sourceTree = "<group>"; };
 		4BFF21C623983C7800FAE15A /* InstagramFirebase.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InstagramFirebase.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4BFF21C923983C7800FAE15A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -102,6 +103,7 @@
 		31B52799D096190B38054D11 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4BD69AD623BF01660024F264 /* MapKit.framework */,
 				C49BFADA80C45B60269F058E /* Pods_InstagramFirebase.framework */,
 			);
 			name = Frameworks;

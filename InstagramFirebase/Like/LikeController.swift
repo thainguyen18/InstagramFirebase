@@ -29,6 +29,17 @@ class LikeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         
     }
     
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        let view = UIView(frame: collectionView.bounds)
+        view.setGradientBackground()
+        
+        collectionView.backgroundView = view
+        
+    }
+    
     @objc func handleRefresh() {
         
         // Remove old data

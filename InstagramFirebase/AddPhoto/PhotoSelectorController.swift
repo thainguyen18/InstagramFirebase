@@ -76,6 +76,18 @@ class PhotoSelectorController: LBTAListHeaderController<ImageCell, UIImage, Phot
         
     }
     
+    
+//    
+//    override func viewWillAppear(_ animated: Bool) {
+//        super.viewWillAppear(animated)
+//        
+//        let view = UIView(frame: collectionView.bounds)
+//        view.setGradientBackground()
+//        
+//        collectionView.backgroundView = view
+//        
+//    }
+    
     // Keep a ref to the header to access selected high res Image
     var photoSelectorHeader: PhotoSelectorHeader?
     
@@ -117,7 +129,7 @@ class PhotoSelectorController: LBTAListHeaderController<ImageCell, UIImage, Phot
     
     fileprivate func assetsFetchOptions() -> PHFetchOptions {
         let fetchOptions = PHFetchOptions()
-        fetchOptions.fetchLimit = 20
+        fetchOptions.fetchLimit = 50
         
         let sortDescriptor = NSSortDescriptor(key: "creationDate", ascending: false)
         fetchOptions.sortDescriptors = [sortDescriptor] 
