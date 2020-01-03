@@ -20,6 +20,13 @@ class SharePhotoController: UIViewController {
         setupImageAndTextViews()
     }
     
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        self.view.setGradientBackground()
+    }
+    
     var selectedImage: UIImage? {
         didSet {
             imageView.image = selectedImage
@@ -63,9 +70,22 @@ class SharePhotoController: UIViewController {
     
     @objc func handleShare() {
         guard let caption = textView.text, caption.count > 0 else {
-            print("Please add caption!")
+            let alert = UIAlertController(title: "No Caption", message: "Please add caption!", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+            
+            present(alert, animated: true)
+            
             return
         }
+        
+        // This is a long process, add a spinner
+        let spinner = UIActivityIndicatorView()
+        spinner.style = .white
+        spinner.color = .systemBlue
+        spinner.hidesWhenStopped = true
+        spinner.startAnimating()
+        view.addSubview(spinner)
+        
         
         // Limit caption text to 160 characters follows Twitter style
         guard textView.text.count <= 160 else {
@@ -107,14 +127,48 @@ class SharePhotoController: UIViewController {
                 
                 print("Successfully uploaded image: ", imageUrl.absoluteString)
                 
-                self.saveToDatabaseWithImageUrl(imageUrl: imageUrl.absoluteString)
+                // Generate image thumnail and save to Firebase storage-----------------------
+                let thumbnailName = UUID().uuidString
+                let size = CGSize(width: selectedImage.size.width * 0.2, height: selectedImage.size.height * 0.2)
+                let renderer = UIGraphicsImageRenderer(size: size)
+                let thumbnailImage = renderer.image { context in
+                    selectedImage.draw(in: CGRect(origin: .zero, size: size))
+                }
+                guard let thumbnailImageData = thumbnailImage.jpegData(compressionQuality: 0.8) else { return }
+                
+                Storage.storage().reference().child("posts").child(thumbnailName).putData(thumbnailImageData, metadata: metadata) { (metaData, error) in
+                if let err = error {
+                    print("Failed to upload image: ", err)
+                    self.navigationItem.rightBarButtonItem?.isEnabled = true
+                    return
+                }
+                
+                guard let path = metaData?.path else { return }
+                
+                Storage.storage().reference(withPath: path).downloadURL { (url, error) in
+                    if let err = error {
+                        print("Some error: ", err)
+                    
+                        return
+                    }
+                    
+                    guard let thumbnailImageUrl = url else { return }
+                    
+                    print("Successfully uploaded thumbnail image: ", thumbnailImageUrl.absoluteString)
+                    
+                    self.saveToDatabaseWithImageUrl(imageUrl: imageUrl.absoluteString, thumbnailUrl: thumbnailImageUrl.absoluteString)
+                    }
+                }
+                // End thumbnail image processing---------------------------------
+                
+                //self.saveToDatabaseWithImageUrl(imageUrl: imageUrl.absoluteString)
             }
         }
     }
     
     static let updateFeedNotificationName = Notification.Name("UpdatedFeed")
     
-    fileprivate func saveToDatabaseWithImageUrl(imageUrl: String) {
+    fileprivate func saveToDatabaseWithImageUrl(imageUrl: String, thumbnailUrl: String) {
         guard let uid = Auth.auth().currentUser?.uid else { return }
         
         guard let postImage = selectedImage else { return }
@@ -123,7 +177,17 @@ class SharePhotoController: UIViewController {
         
         let userPostRef = Firestore.firestore().collection("posts").document()
         
-        let values: [String : Any] = ["imageUrl" : imageUrl, "caption" : caption, "imageWidth" : postImage.size.width, "imageHeight" : postImage.size.height, "creationDate" : Date().timeIntervalSince1970, "userId": uid]
+        let window = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
+        
+        guard let mainTabBarController =  window?.rootViewController as? MainTabBarController else { return }
+        
+        guard let location = mainTabBarController.locationFetcher.lastKnownLocation else { return }
+        
+        let latitude = Double(location.latitude)
+        let longitude = Double(location.longitude)
+        
+        let values: [String : Any] = ["imageUrl" : imageUrl, "caption" : caption, "imageWidth" : postImage.size.width, "imageHeight" : postImage.size.height, "creationDate" : Date().timeIntervalSince1970, "userId": uid, "latitude" : latitude, "longitude" : longitude,
+                                      "thumbnailUrl": thumbnailUrl]
         
         userPostRef.setData(values) { (error) in
             if let err = error {

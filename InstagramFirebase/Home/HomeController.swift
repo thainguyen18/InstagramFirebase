@@ -36,6 +36,17 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         
     }
     
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        let view = UIView(frame: collectionView.bounds)
+        view.setGradientBackground()
+        
+        collectionView.backgroundView = view
+        
+    }
+    
     var currentUser = Auth.auth().currentUser {
         didSet {
             print(currentUser?.uid ?? "...")
@@ -93,6 +104,9 @@ class HomeController: LBTAListController<HomePostCell, Post>, UICollectionViewDe
         
         let mapView = MapViewController()
         mapView.modalPresentationStyle = .fullScreen
+        
+        // Pass data to mapview
+        mapView.posts = self.items
         
         self.present(mapView, animated: true)
     }

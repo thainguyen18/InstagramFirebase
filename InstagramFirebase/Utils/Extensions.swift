@@ -50,3 +50,19 @@ extension UIColor {
         return UIColor.rgb(red: 17, green: 154, blue: 237)
     }
 }
+
+extension UIView {
+    func setGradientBackground() {
+        let colorTop =  UIColor(red: 14.0/255.0, green: 201.0/255.0, blue: 176.0/255.0, alpha: 1.0).cgColor
+        let colorBottom = UIColor(red: 34.0/255.0, green: 165.0/255.0, blue: 251.0/255.0, alpha: 1.0).cgColor
+
+        let gradientLayer = CAGradientLayer()
+        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
+        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
+        gradientLayer.colors = [colorTop, colorBottom]
+        
+        gradientLayer.frame = self.bounds
+
+        self.layer.insertSublayer(gradientLayer, at:0)
+    }
+}
