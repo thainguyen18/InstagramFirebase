@@ -84,11 +84,13 @@ class SharePhotoController: UIViewController {
         
         // This is a long process, add a spinner
         let spinner = UIActivityIndicatorView()
-        spinner.style = .white
-        spinner.color = .systemBlue
+        spinner.style = .whiteLarge
         spinner.hidesWhenStopped = true
-        spinner.startAnimating()
+        
         view.addSubview(spinner)
+        spinner.centerInSuperview()
+        
+        spinner.startAnimating()
         
         
         // Limit caption text to 160 characters follows Twitter style
@@ -115,6 +117,10 @@ class SharePhotoController: UIViewController {
             if let err = error {
                 print("Failed to upload image: ", err)
                 self.navigationItem.rightBarButtonItem?.isEnabled = true
+                
+                spinner.stopAnimating()
+                spinner.removeFromSuperview()
+                
                 return
             }
             
@@ -124,6 +130,10 @@ class SharePhotoController: UIViewController {
                 if let err = error {
                     print("Some error: ", err)
                     self.navigationItem.rightBarButtonItem?.isEnabled = true
+                    
+                    spinner.stopAnimating()
+                    spinner.removeFromSuperview()
+                    
                     return
                 }
                 
@@ -147,6 +157,10 @@ class SharePhotoController: UIViewController {
                 if let err = error {
                     print("Failed to upload image: ", err)
                     self.navigationItem.rightBarButtonItem?.isEnabled = true
+                    
+                    spinner.stopAnimating()
+                    spinner.removeFromSuperview()
+                    
                     return
                 }
                 
@@ -155,6 +169,9 @@ class SharePhotoController: UIViewController {
                 Storage.storage().reference(withPath: path).downloadURL { (url, error) in
                     if let err = error {
                         print("Some error: ", err)
+                        
+                        spinner.stopAnimating()
+                        spinner.removeFromSuperview()
                     
                         return
                     }

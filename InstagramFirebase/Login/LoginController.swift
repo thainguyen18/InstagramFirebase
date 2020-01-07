@@ -81,9 +81,22 @@ class LoginController: UIViewController {
         guard let email = emailTextField.text else { return }
         guard let password = passwordTextField.text else { return }
         
+        let spinner = UIActivityIndicatorView()
+        spinner.style = .whiteLarge
+        spinner.hidesWhenStopped = true
+        
+        self.view.addSubview(spinner)
+        spinner.centerXToSuperview()
+        spinner.anchor(top: loginButton.bottomAnchor, leading: nil, bottom: nil, trailing: nil, padding: .init(top: 16, left: 0, bottom: 0, right: 0))
+        
+        spinner.startAnimating()
+        
         Auth.auth().signIn(withEmail: email, password: password) { (authDataResult, error) in
             if let err = error {
                 print("Failed to log in: ", err)
+                
+                spinner.stopAnimating()
+                spinner.removeFromSuperview()
                 
                 let alert = UIAlertController(title: "Failed to log in", message: "Please check your email/password.", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default))

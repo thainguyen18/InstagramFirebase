@@ -198,6 +198,17 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         guard let username = usernameTextField.text, username.count > 0 else { return }
         guard let password = passwordTextField.text, password.count > 0 else { return }
         
+        
+        let spinner = UIActivityIndicatorView()
+        spinner.style = .whiteLarge
+        spinner.hidesWhenStopped = true
+        
+        self.view.addSubview(spinner)
+        spinner.centerXToSuperview()
+        spinner.anchor(top: signupButton.bottomAnchor, leading: nil, bottom: nil, trailing: nil, padding: .init(top: 16, left: 0, bottom: 0, right: 0))
+        
+        spinner.startAnimating()
+        
         // Handle updating profile if in such case
         if self.signupButton.titleLabel?.text == "Update" {
             print("Handle updating...")
@@ -212,6 +223,9 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
         Auth.auth().createUser(withEmail: email, password: password) { (result: AuthDataResult?, error: Error?) in
             if let err = error {
                 print("Failed to create user", err)
+                
+                spinner.stopAnimating()
+                spinner.removeFromSuperview()
                 
                 let alert = UIAlertController(title: "Error! Failed to sign up", message: "Please try again later.", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default))
@@ -236,6 +250,10 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
             Storage.storage().reference().child("profile_images").child(fileName).putData(imageData, metadata: metaData) { (metaData, error) in
                 if let err = error {
                     print("Failed to upload profile image: ", err)
+                    
+                    spinner.stopAnimating()
+                    spinner.removeFromSuperview()
+                    
                     return
                 }
                 
@@ -244,6 +262,10 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
                 Storage.storage().reference(withPath: path).downloadURL(completion: { (url, error) in
                     if let err = error {
                         print("Some error: ", err)
+                        
+                        spinner.stopAnimating()
+                        spinner.removeFromSuperview()
+                        
                         return
                     }
                     
@@ -264,6 +286,10 @@ class SignUpController: UIViewController, UINavigationControllerDelegate, UIImag
                         completion: { (err) in
                         if let err = err {
                             print("Failed to save user info into db: ", err)
+                            
+                            spinner.stopAnimating()
+                            spinner.removeFromSuperview()
+                            
                             return
                         }
                         
